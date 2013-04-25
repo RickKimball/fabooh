@@ -31,7 +31,7 @@ BL_ARGS = -wipe -control -postreset $(OUT_DIR)/$(PROJECT).hex /dev/ttyUSB0 11520
 #=============================================================================#
 
 # fabooh directory
-FBD = /home2/kimballr/lpc1114_ws/fabooh2
+FBD := $(dir $(lastword $(MAKEFILE_LIST)))
 
 # which board to use 
 BOARD = lpc1114fn28
