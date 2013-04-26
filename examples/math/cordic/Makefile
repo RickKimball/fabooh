@@ -2,6 +2,8 @@
 # fabooh example makefile
 #
 
-PROJECT=echo
+PROJECT = cordic_table
+LIBS =
 
 include ../../../common.mk
+

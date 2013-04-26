@@ -116,5 +116,7 @@ struct cpu_lpc11xx_t
 typedef cpu_lpc11xx_t<F_CPU> CPU;
 
 #define delay(msec) CPU::delay_msec((msec))
+#define delay_msecs(msec) CPU::delay_msec((msec))
+
 
 #endif /* CPU_LPC11XX_H_ */

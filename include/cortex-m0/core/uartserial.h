@@ -35,7 +35,7 @@
 
 #include <lpc1100l.h>
 
-template <uint32_t BAUD, uint32_t MCLK_HZ, typename TXPIN, typename RXPIN>
+template <const uint32_t BAUD, uint32_t MCLK_HZ, typename TXPIN, typename RXPIN>
 struct serial_base_uart_t {
   static const uint32_t bit_cycles = (((MCLK_HZ / 1) / 2) / 16) / BAUD; // cycles/bit
 

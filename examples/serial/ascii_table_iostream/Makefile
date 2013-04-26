@@ -2,6 +2,6 @@
 # fabooh blink makefile
 #
 
-PROJECT?=ascii_iostream
+PROJECT=ascii_iostream
 
 include ../../../common.mk

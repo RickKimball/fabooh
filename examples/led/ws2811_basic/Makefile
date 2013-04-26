@@ -2,6 +2,7 @@
 # fabooh blink makefile
 #
 
-PROJECT=ascii_table
+PROJECT ?= ws2811_basic
+LIBS ?=
 
 include ../../../common.mk

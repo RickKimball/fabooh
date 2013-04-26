@@ -29,10 +29,6 @@
 
 #include <fabooh.h>
 
-#ifndef USE_SPI
-#define USE_SPI 1
-#endif
-
 // lcd::nokia::Nokai5110 {}
 namespace lcd {
 namespace nokia {
@@ -71,10 +67,6 @@ struct Nokia5110
     void printv(unsigned char x, unsigned char y, char *s);
 
     ALWAYS_INLINE void shiftout(const unsigned char c) {
-#if defined(__HAS_USCI__) && defined(USE_SPI) && USE_SPI
-        UCB0TXBUF = c;             // setting TXBUF clears the TXIFG flag
-        while (UCB0STAT & UCBUSY); // wait for SPI TX/RX to finish
-#else
       register unsigned mask = 0x0080;
 
       do {
@@ -87,7 +79,6 @@ struct Nokia5110
           mask >>= 1; // could be below this line just making the duty cycle longer
           _SCLK::high();
       } while(mask);
-#endif
     }
 };
 

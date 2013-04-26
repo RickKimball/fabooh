@@ -2,6 +2,7 @@
 # fabooh example makefile
 #
 
-PROJECT=echo
-
+PROJECT = sin_table
+LIBS = -lm
 include ../../../common.mk
+

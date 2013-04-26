@@ -2,6 +2,7 @@
 # fabooh blink makefile
 #
 
-PROJECT=ascii_table
+PROJECT ?= nokia5110_logo
+LIBS ?=
 
 include ../../../common.mk

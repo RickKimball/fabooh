@@ -63,7 +63,7 @@ struct serial_base_sw_t {
   /**
    * begin() - initialize TX/RX pins
    */
-  void begin(uint32_t baud=BAUD) {
+  void begin(const uint32_t baud=BAUD) {
       TXPIN::high();          // TX pin idles with a high value
       TXPIN::setmode_output();
       RXPIN::setmode_input();
@@ -198,7 +198,7 @@ int serial_base_sw_t<BAUD, MCLK_HZ, TXPIN, RXPIN>::_read() {
 }
 
 // typical usage
-template <uint32_t BAUD, uint32_t MCLK_HZ, typename TXPIN, typename RXPIN>
+template <const uint32_t BAUD, uint32_t MCLK_HZ, typename TXPIN, typename RXPIN>
 struct sw_serial_t:
     serial_base_sw_t<BAUD,MCLK_HZ,TXPIN,RXPIN>,
     print_t<sw_serial_t<BAUD, MCLK_HZ, TXPIN, RXPIN> >

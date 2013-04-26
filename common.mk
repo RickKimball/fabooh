@@ -31,8 +31,11 @@ FBD := $(dir $(lastword $(MAKEFILE_LIST)))
 BOARD ?= lpc1114fn28
 BOARDDIR = board/$(BOARD)
 BOARDS = $(notdir $(wildcard $(FBD)board/*))
+_3RD_PARTY_DIR = include/3rdparty
 
-FABOOH_FLAGS = -DFABOOH=0x0100
+FIXMATH_FLAGS = -DFIXMATH_NO_CACHE -DFIXMATH_NO_64BIT -DFIXMATH_NO_ROUNDING
+FABOOH_FLAGS = $(FIXMATH_FLAGS)
+FABOOH_FLAGS += -fwrapv -fomit-frame-pointer
 
 #=============================================================================#
 # board specific options, cpu and toolchain selection
@@ -55,7 +58,7 @@ OUT_DIR = $(BOARD)_release
 
 # include directories (absolute or relative paths to additional folders with
 # headers, current folder is always included)
-INC_DIRS = include/$(CORE)/core $(BOARDDIR) include/3rdparty  
+INC_DIRS = include/$(CORE)/core $(BOARDDIR) $(_3RD_PARTY_DIR) 
 
 # library directories (absolute or relative paths to additional folders with
 # libraries)
@@ -63,7 +66,7 @@ LIB_DIRS = $(BOARDDIR)
 
 # libraries (additional libraries for linking, e.g. "-lm -lsome_name" to link
 # math library libm.a and libsome_name.a)
-LIBS =
+LIBS ?=
 
 # additional directories with source files (absolute or relative paths to
 # folders with source files, current folder is always included)
@@ -207,7 +210,7 @@ $(OUT_DIR_F)%.o : %.$(CXX_EXT)
 #-----------------------------------------------------------------------------#
 
 $(OUT_DIR_F)%.o : %.$(C_EXT)
-	@echo 'Compiling file: $<'
+	@echo 'Compiling C file: $<'
 	$(CXX) -c $(CXX_FLAGS_F) $< -o $@
 	@echo ' '
 
@@ -295,6 +298,7 @@ else
 endif
 ifneq ($(strip $(GENERATED)), )
 	$(RM) $(GENERATED)
+	$(RM) -fr $(OUT_DIR_F)
 else
 	@echo 'Nothing to remove...'
 endif

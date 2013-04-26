@@ -2,7 +2,6 @@
 # fabooh example makefile
 #
 
-#override BOARD = msp430g2553in20
 BOARD = msp430g2553in20
 PROJECT ?= gdb_bootloader
 

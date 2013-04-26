@@ -1,10 +1,10 @@
 /*
- * serial.h - common serial include
+ * cordic_wrapper.cpp - provide utility functions for cordic routines
  *
- * Created: Nov-12-2012
- *  Author: rick@kimballsoftware.com
- *    Date: 03-02-2013
- * Version: 1.0.1
+ *  Created: Mar 12, 2013
+ *   Author: rick@kimballsoftware.com
+ *     Date: Mar 12, 2013
+ *  Version: 1.0.0
  *
  * =========================================================================
  *  Copyright © 2013 Rick Kimball
@@ -23,25 +23,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SERIAL_H_
-#define SERIAL_H_
+/*
+ * c++ wrapper for the cordic functions from https://github.com/the0b/MSP430-CORDIC-sine-cosine
+ *
+ */
 
-#include "uartserial.h"
+#include <fabooh.h>
+#include "cordic_wrapper.h"
 
-//------------------------------------------------------------------------
-// mix-in some serial and print to form a working serial class
+template <typename T>
+int _abs(T x) {
+  return (x < 0)  ?  -x  :  x;
+}
 
-template <uint32_t BAUD, uint32_t MCLK_HZ,
-          typename TXPIN, typename RXPIN>
-struct serial_default_t:
-    serial_base_uart_t<BAUD, MCLK_HZ, TXPIN, RXPIN>,
-    print_t<serial_default_t<BAUD, MCLK_HZ, TXPIN, RXPIN>, uint32_t, uint32_t >
-{
-};
+int sin_q15(int theta) {
+  if ( theta == 0 || _abs(theta) == 180 || _abs(theta) == 360)
+    return 0;
 
-// TODO: implement a Timer based software version
-// TODO: enhanced software version to support port pin triggering
-// TODO: add timeout option
-// TODO: add ring buffer implementations
+  int sin_result,dummy;
 
-#endif
+  cordic_sincos(theta,14,&sin_result,&dummy);
+
+  return sin_result;
+}
+
+int cos_q15(int theta) {
+  int cos_result,dummy;;
+
+  cordic_sincos(theta,14,&dummy,&cos_result);
+
+  return cos_result;
+}

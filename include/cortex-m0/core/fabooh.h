@@ -23,6 +23,8 @@
 #include <stdarg.h>
 #include <lpc1100l.h>
 
+#include <libfixmath/fix16.hpp>
+
 #include "cpu.h"
 #include "gpio.h"
 #include "print.h"

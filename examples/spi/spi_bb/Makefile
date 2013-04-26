@@ -2,6 +2,7 @@
 # fabooh blink makefile
 #
 
-PROJECT=ascii_table
+PROJECT =spi_bb
+LIBS =
 
 include ../../../common.mk
