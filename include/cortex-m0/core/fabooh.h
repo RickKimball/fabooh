@@ -8,6 +8,9 @@
 #ifndef FABOOH_H_
 #define FABOOH_H_
 
+#define FABOOH_VER 0x0100
+#define FABOOH_BLD 0x0003
+
 #ifndef F_CPU
 #define F_CPU 12000000
 #endif

@@ -1,5 +1,6 @@
 #=============================================================================#
-# ARM - common.mk mostly based on the Chopin header modifed for use with fabooh
+# common.mk - this file mostly based on the Chopin make. It is heavily
+#             modifed for use with fabooh and multiple chip targets
 #
 # author: Freddie Chopin, http://www.freddiechopin.info/
 # last change: 2010-10-13
@@ -9,13 +10,38 @@
 # 04-17-2013 - rick@kimballsoftware use this as common.mk
 #              include in your own directory, see example/basic/blink
 #              for information how to do this
+# 04-26-2013 - rick@kimballsoftware, modified for multi boards and 
+#              different chip architectures
 #=============================================================================#
+
+#=============================================================================#
+# project configuration
+#=============================================================================#
+
+# PROJECT = sample
+# project name, we don't set it here, configure in Makefile of user code
+# see examples for proper Makefile setup
+
+#=============================================================================#
+# fabooh TLD (Top Level Directory)
+#=============================================================================#
+FBD := $(dir $(lastword $(MAKEFILE_LIST)))
+
+# which board will be used as default
+BOARD ?= lpc1114fn28
+BOARDDIR = board/$(BOARD)
+BOARDS = $(notdir $(wildcard $(FBD)board/*))
+
+FABOOH_FLAGS = -DFABOOH=0x0100
+
+#=============================================================================#
+# board specific options, cpu and toolchain selection
+#=============================================================================#
+include $(FBD)$(BOARDDIR)/board.mk
 
 #=============================================================================#
 # toolchain configuration
 #=============================================================================#
-
-TOOLCHAIN = arm-none-eabi-
 
 CXX = $(TOOLCHAIN)g++
 CC = $(TOOLCHAIN)gcc
@@ -23,44 +49,13 @@ AS = $(TOOLCHAIN)gcc -x assembler-with-cpp
 OBJCOPY = $(TOOLCHAIN)objcopy
 OBJDUMP = $(TOOLCHAIN)objdump
 SIZE = $(TOOLCHAIN)size
-BOOTLOADER = lpc21isp
-BL_ARGS = -wipe -control -postreset $(OUT_DIR)/$(PROJECT).hex /dev/ttyUSB0 115200 12000
-
-#=============================================================================#
-# project configuration
-#=============================================================================#
-
-# fabooh directory
-FBD := $(dir $(lastword $(MAKEFILE_LIST)))
-
-# which board to use 
-BOARD = lpc1114fn28
-BOARDDIR = board/$(BOARD)
-
-# project name ... don't set here, configure in your user directory Makefile
-# PROJECT = sample
-
-# core type
-CORE = cortex-m0
-
-# linker script
-LD_SCRIPT = $(FBD)/$(BOARDDIR)/lpc1114.ld
 
 # output folder (absolute or relative path, leave empty for in-tree compilation)
 OUT_DIR = $(BOARD)_release
 
-# C++ definitions (e.g. "-Dsymbol_with_value=0xDEAD -Dsymbol_without_value")
-CXX_DEFS = -DCORE_M0
-
-# C definitions
-C_DEFS = -DCORE_M0
-
-# ASM definitions
-AS_DEFS =
-
 # include directories (absolute or relative paths to additional folders with
 # headers, current folder is always included)
-INC_DIRS = include/$(CORE)/core $(BOARDDIR) $(BOARDDIR)/chip_11xx $(BOARDDIR)/lpc_ip $(BOARDDIR)/chip_common  
+INC_DIRS = include/$(CORE)/core $(BOARDDIR) include/3rdparty  
 
 # library directories (absolute or relative paths to additional folders with
 # libraries)
@@ -72,7 +67,7 @@ LIBS =
 
 # additional directories with source files (absolute or relative paths to
 # folders with source files, current folder is always included)
-SRCS_DIRS = $(FBD)/$(BOARDDIR)
+SRCS_DIRS = $(FBD)$(BOARDDIR)
 
 # extension of C++ files
 CXX_EXT = cpp
@@ -97,12 +92,14 @@ AS_SRCS = $(wildcard $(patsubst %, %/*.$(AS_EXT), . $(SRCS_DIRS)))
 
 # optimization flags ("-O0" - no optimization, "-O1" - optimize, "-O2" -
 # optimize even more, "-Os" - optimize for size or "-O3" - optimize yet more) 
-#OPTIMIZATION = -Os -save-temps
 OPTIMIZATION = -Os
 
 # warning options 
-CXX_WARNINGS = -Wall -Wextra
-C_WARNINGS = -Wall -Wstrict-prototypes -Wextra
+#CXX_WARNINGS = -Wall -Wextra
+#C_WARNINGS = -Wall -Wstrict-prototypes -Wextra
+
+CXX_WARNINGS = -Wall
+C_WARNINGS = -Wall -Wstrict-prototypes
 
 # C++ language standard ("c++98", "gnu++98" - default, "c++0x", "gnu++0x")
 CXX_STD = gnu++98
@@ -131,9 +128,6 @@ endif
 # various compilation flags
 #=============================================================================#
 
-# core flags
-CORE_FLAGS = -mcpu=$(CORE) -mthumb
-
 # listing flags
 LISTING_FLAGS = -Wa,-ahlms=$(OUT_DIR_F)$(notdir $(<:.c=.lst))
 
@@ -142,20 +136,12 @@ LISTING_FLAGS = -Wa,-ahlms=$(OUT_DIR_F)$(notdir $(<:.c=.lst))
 CXX_FLAGS = -std=$(CXX_STD) -g -ggdb3 -fno-rtti -fno-exceptions -fverbose-asm
 
 # flags for C compiler
-C_FLAGS = -std=$(C_STD) -g -ggdb3 -fverbose-asm -Wa,-ahlms=$(OUT_DIR_F)$(notdir $(<:.$(C_EXT)=.lst))
+#C_FLAGS = -std=$(C_STD) -g -ggdb3 -fverbose-asm -Wa,-ahlms=$(OUT_DIR_F)$(notdir $(<:.$(C_EXT)=.lst))
+C_FLAGS = -std=$(C_STD) -g -ggdb3 -fverbose-asm
 
 # flags for assembler
-AS_FLAGS = -g -ggdb3 -Wa,-amhls=$(OUT_DIR_F)$(notdir $(<:.$(AS_EXT)=.lst))
-
-# flags for linker
-LD_FLAGS = -T$(LD_SCRIPT) -g -Wl,-Map=$(OUT_DIR_F)$(PROJECT).map,--cref,--no-warn-mismatch
-
-# remove unused code and data
-LD_FLAGS += -Wl,--gc-sections
-OPTIMIZATION += -ffunction-sections -fdata-sections
-
-# do not use the standard startup
-LD_FLAGS += -nostartfiles
+#AS_FLAGS = -g -ggdb3 -Wa,-amhls=$(OUT_DIR_F)$(notdir $(<:.$(AS_EXT)=.lst))
+AS_FLAGS = -g -ggdb3
 
 
 #=============================================================================#
@@ -167,8 +153,8 @@ C_OBJS = $(addprefix $(OUT_DIR_F), $(notdir $(C_SRCS:.$(C_EXT)=.o)))
 AS_OBJS = $(addprefix $(OUT_DIR_F), $(notdir $(AS_SRCS:.$(AS_EXT)=.o)))
 OBJS = $(AS_OBJS) $(C_OBJS) $(CXX_OBJS) $(USER_OBJS)
 DEPS = $(OBJS:.o=.d)
-INC_DIRS_F = -I$(FBD)/. $(patsubst %, -I$(FBD)/%, $(INC_DIRS))
-LIB_DIRS_F = $(patsubst %, -L$(FBD)/%, $(LIB_DIRS))
+INC_DIRS_F = -I$(FBD) $(patsubst %, -I$(FBD)%, $(INC_DIRS))
+LIB_DIRS_F = $(patsubst %, -L$(FBD)%, $(LIB_DIRS))
 
 ELF = $(OUT_DIR_F)$(PROJECT).elf
 HEX = $(OUT_DIR_F)$(PROJECT).hex
@@ -176,11 +162,12 @@ BIN = $(OUT_DIR_F)$(PROJECT).bin
 LSS = $(OUT_DIR_F)$(PROJECT).lss
 DMP = $(OUT_DIR_F)$(PROJECT).dmp
 
+
 # format final flags for tools, request dependancies for C++, C and asm
-CXX_FLAGS_F = $(CORE_FLAGS) $(OPTIMIZATION) $(CXX_WARNINGS) $(CXX_FLAGS)  $(CXX_DEFS) -MD -MP -MF $(OUT_DIR_F)$(@F:.o=.d) $(INC_DIRS_F)
-C_FLAGS_F = $(CORE_FLAGS) $(OPTIMIZATION) $(C_WARNINGS) $(C_FLAGS) $(C_DEFS) -MD -MP -MF $(OUT_DIR_F)$(@F:.o=.d) $(INC_DIRS_F)
-AS_FLAGS_F = $(CORE_FLAGS) $(AS_FLAGS) $(AS_DEFS) -MD -MP -MF $(OUT_DIR_F)$(@F:.o=.d) $(INC_DIRS_F)
-LD_FLAGS_F = $(CORE_FLAGS) $(LD_FLAGS) $(LIB_DIRS_F)
+CXX_FLAGS_F = $(CORE_FLAGS) $(OPTIMIZATION) $(CXX_WARNINGS) $(FABOOH_FLAGS) $(CXX_FLAGS) $(CXX_DEFS) -MD -MP -MF $(OUT_DIR_F)$(@F:.o=.d) $(INC_DIRS_F)
+C_FLAGS_F = $(CORE_FLAGS) $(OPTIMIZATION) $(C_WARNINGS) $(FABOOH_FLAGS) $(C_FLAGS) $(C_DEFS) -MD -MP -MF $(OUT_DIR_F)$(@F:.o=.d) $(INC_DIRS_F)
+AS_FLAGS_F = $(CORE_FLAGS) $(FABOOH_FLAGS) $(AS_FLAGS) $(AS_DEFS) -MD -MP -MF $(OUT_DIR_F)$(@F:.o=.d) $(INC_DIRS_F)
+LD_FLAGS_F = $(CORE_FLAGS) $(FABOOH_FLAGS) $(LD_FLAGS) $(LIB_DIRS_F)
 
 #contents of output directory
 GENERATED = $(wildcard $(patsubst %, $(OUT_DIR_F)*.%, bin d dmp elf hex lss lst map o))
@@ -193,9 +180,9 @@ all : make_output_dir $(ELF) $(LSS) $(DMP) $(HEX) $(BIN) print_size
 
 # make object files dependent on Makefile
 $(OBJS) : Makefile
+
 # make .elf file dependent on linker script
 $(ELF) : $(LD_SCRIPT)
-
 
 #-----------------------------------------------------------------------------#
 # linking - objects -> elf
@@ -203,7 +190,7 @@ $(ELF) : $(LD_SCRIPT)
 
 $(ELF) : $(OBJS)
 	@echo 'Linking target: $(ELF)'
-	$(CXX) $(LD_FLAGS_F) $(OBJS) $(LIBS) -o $@
+	$(LD) $(LD_FLAGS_F) $(OBJS) $(LIBS) -o $@
 	@echo ' '
 
 #-----------------------------------------------------------------------------#
@@ -273,12 +260,12 @@ print_size :
 	@echo 'Size of modules:'
 	$(SIZE) -B -t --common $(OBJS) $(USER_OBJS)
 	@echo ' '
+	$(SIZE) $(ELF)
+	@echo ' '
 
 #-----------------------------------------------------------------------------#
 # install
 #-----------------------------------------------------------------------------#
-
-#	$(BOOTLOADER) -wipe -control -postreset $(OUT_DIR)/$(PROJECT).hex /dev/ttyUSB0 115200 12000
 
 install : all
 	$(BOOTLOADER) $(BL_ARGS)
@@ -290,6 +277,11 @@ install : all
 
 make_output_dir :
 	$(shell mkdir $(OUT_DIR_F) 2>/dev/null)
+	
+boards :
+	@echo 'valid BOARD targets are: $(BOARDS)'
+	@echo 'use:'
+	@echo '$$ make BOARD=xxxxxx clean all install'
 
 #=============================================================================#
 # make clean
@@ -311,7 +303,7 @@ endif
 # global exports
 #=============================================================================#
 
-.PHONY: all clean dependents install
+.PHONY: all clean dependents install boards
 
 .SECONDARY:
 

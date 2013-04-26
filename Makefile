@@ -4,6 +4,7 @@
 # common.mk is used to select MCU and BOARD variants
 #
 
+
 .PHONY: clean sizes
 
 all:
@@ -12,8 +13,6 @@ all:
 	#@make -C examples/lcd all
 	#@make -C examples/math all
 	@make -C examples/serial all
-	#@make -C examples/energia_ide_examples/blink all
-	#@make -C examples/energia_ide_examples/serial/ascii_table_extended all
 	#@make -C examples/spi all
 	#@make -C examples/adc all
 	#@make -C apps all
@@ -24,8 +23,6 @@ clean:
 	#@make -C examples/lcd clean
 	#@make -C examples/math clean
 	@make -C examples/serial clean
-	#@make -C examples/energia_ide_examples/blink clean
-	#@make -C examples/energia_ide_examples/serial/ascii_table_extended clean
 	#@make -C examples/spi clean
 	#@make -C examples/adc clean
 	#@make -C apps clean
