@@ -75,14 +75,14 @@ namespace led {
             do {
               if (*data & bit_mask ) {
                 // ~600ns high / ~625ns low at 800kHz
-                bits = 0b111111100000000; //transmit data upper 8 bits of conversion result (section 14.6.3)
+                bits = 0b111111100000000;         // 7 * 83.333 ~600ns
               }
               else {
                 // ~250ns high / ~1000ns low at 800kHz
-                bits = 0b111000000000000; //transmit data upper 8 bits of conversion result (section 14.6.3)
+                bits = 0b111000000000000;         // 3 * 83.333 ~250ns
               }
               while ( !(LPC_SSP0->SR & (1<<1)) ); // wait until !TNF (Transmit Not Full) (14.6.4)
-              LPC_SSP0->DR = bits;
+              LPC_SSP0->DR = bits;                // push bits into Transmit FIFO
               bit_mask >>= 1;
             } while(bit_mask);
             data++;
