@@ -27,7 +27,7 @@
 #ifndef CPU_H_
 #define CPU_H_
 
-#include <lpc1100l.h>
+#include <LPC11xx.h>
 
 template<uint32_t MCLK_FREQ>
 struct cpu_base_t {

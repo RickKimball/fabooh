@@ -298,7 +298,7 @@ else
 endif
 ifneq ($(strip $(GENERATED)), )
 	$(RM) $(GENERATED)
-	$(RM) -fr $(OUT_DIR_F)
+	$(RM) -r $(OUT_DIR_F)
 else
 	@echo 'Nothing to remove...'
 endif

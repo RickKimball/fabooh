@@ -1,9 +1,10 @@
 /****************************************************************************
+ *   $Id:: LPC11xx.h 3635 2010-06-02 00:31:46Z usb00423                     $
  *   Project: NXP LPC11xx software example  
  *
  *   Description:
  *     CMSIS Cortex-M0 Core Peripheral Access Layer Header File for 
- *     NXP LPC11xx Device Series 
+ *           NXP LPC11xx Device Series
  *
  ****************************************************************************
  * Software that is described herein is for illustrative purposes only
@@ -47,6 +48,7 @@
  * ---------- Interrupt Number Definition -----------------------------------
  * ==========================================================================
  */
+
 typedef enum IRQn
 {
 /******  Cortex-M0 Processor Exceptions Numbers ***************************************************/
@@ -56,7 +58,7 @@ typedef enum IRQn
   PendSV_IRQn                   = -2,     /*!< 14 Cortex-M0 Pend SV Interrupt                     */
   SysTick_IRQn                  = -1,     /*!< 15 Cortex-M0 System Tick Interrupt                 */
 
-/******  LPC11Cxx or LPC11xx Specific Interrupt Numbers *******************************************************/
+/******  LPC11xx Specific Interrupt Numbers *******************************************************/
   WAKEUP0_IRQn                  = 0,        /*!< All I/O pins can be used as wakeup source.       */
   WAKEUP1_IRQn                  = 1,        /*!< There are 13 pins in total for LPC11xx           */
   WAKEUP2_IRQn                  = 2,
@@ -70,7 +72,7 @@ typedef enum IRQn
   WAKEUP10_IRQn                 = 10,       
   WAKEUP11_IRQn                 = 11,       
   WAKEUP12_IRQn                 = 12,       
-  CAN_IRQn                      = 13,       /*!< CAN Interrupt                                    */
+  // CAN_IRQn                   = 13,       /*!< CAN Interrupt                                    */
   SSP1_IRQn                     = 14,       /*!< SSP1 Interrupt                                   */
   I2C_IRQn                      = 15,       /*!< I2C Interrupt                                    */
   TIMER_16_0_IRQn               = 16,       /*!< 16-bit Timer0 Interrupt                          */
@@ -79,12 +81,11 @@ typedef enum IRQn
   TIMER_32_1_IRQn               = 19,       /*!< 32-bit Timer1 Interrupt                          */
   SSP0_IRQn                     = 20,       /*!< SSP0 Interrupt                                   */
   UART_IRQn                     = 21,       /*!< UART Interrupt                                   */
-  Reserved0_IRQn                = 22,       /*!< Reserved Interrupt                               */
-  Reserved1_IRQn                = 23,       
+  // Reserved0                  = 22
+  // Reserved1                  = 23
   ADC_IRQn                      = 24,       /*!< A/D Converter Interrupt                          */
   WDT_IRQn                      = 25,       /*!< Watchdog timer Interrupt                         */  
   BOD_IRQn                      = 26,       /*!< Brown Out Detect(BOD) Interrupt                  */
-  FMC_IRQn                      = 27,       /*!< Flash Memory Controller Interrupt                */
   EINT3_IRQn                    = 28,       /*!< External Interrupt 3 Interrupt                   */
   EINT2_IRQn                    = 29,       /*!< External Interrupt 2 Interrupt                   */
   EINT1_IRQn                    = 30,       /*!< External Interrupt 1 Interrupt                   */
@@ -99,7 +100,7 @@ typedef enum IRQn
 
 /* Configuration of the Cortex-M3 Processor and Core Peripherals */
 #define __MPU_PRESENT             0         /*!< MPU present or not                               */
-#define __NVIC_PRIO_BITS          3         /*!< Number of Bits used for Priority Levels          */
+#define __NVIC_PRIO_BITS          2         /*!< Number of Bits used for Priority Levels          */
 #define __Vendor_SysTickConfig    0         /*!< Set to 1 if different SysTick Config is used     */
 
 /*@}*/ /* end of group LPC11xx_CMSIS */
@@ -126,7 +127,7 @@ typedef struct
   __IO uint32_t SYSMEMREMAP;            /*!< Offset: 0x000 System memory remap (R/W) */
   __IO uint32_t PRESETCTRL;             /*!< Offset: 0x004 Peripheral reset control (R/W) */
   __IO uint32_t SYSPLLCTRL;             /*!< Offset: 0x008 System PLL control (R/W) */
-  __IO uint32_t SYSPLLSTAT;             /*!< Offset: 0x00C System PLL status (R/W ) */
+  __IO uint32_t SYSPLLSTAT;             /*!< Offset: 0x00C System PLL status (R/ ) */
        uint32_t RESERVED0[4];
 
   __IO uint32_t SYSOSCCTRL;             /*!< Offset: 0x020 System oscillator control (R/W) */
@@ -166,6 +167,7 @@ typedef struct
   __IO uint32_t PIOPORCAP0;             /*!< Offset: 0x100 POR captured PIO status 0 (R/ ) */           
   __IO uint32_t PIOPORCAP1;             /*!< Offset: 0x104 POR captured PIO status 1 (R/ ) */   
        uint32_t RESERVED10[18];
+
   __IO uint32_t BODCTRL;                /*!< Offset: 0x150 BOD control (R/W) */
        uint32_t RESERVED11[1];
   __IO uint32_t SYSTCKCAL;              /*!< Offset: 0x158 System tick counter calibration (R/W) */
@@ -176,13 +178,9 @@ typedef struct
 
   __IO uint32_t STARTAPRP0;             /*!< Offset: 0x200 Start logic edge control Register 0 (R/W) */     
   __IO uint32_t STARTERP0;              /*!< Offset: 0x204 Start logic signal enable Register 0 (R/W) */      
-  __O  uint32_t STARTRSRP0CLR;          /*!< Offset: 0x208 Start logic reset Register 0  ( /W) */
+  __IO uint32_t STARTRSRP0CLR;          /*!< Offset: 0x208 Start logic reset Register 0  ( /W) */
   __IO uint32_t STARTSRP0;              /*!< Offset: 0x20C Start logic status Register 0 (R/W) */
-  __IO uint32_t STARTAPRP1;             /*!< Offset: 0x210 Start logic edge control Register 0 (R/W). (LPC11UXX only) */     
-  __IO uint32_t STARTERP1;              /*!< Offset: 0x214 Start logic signal enable Register 0 (R/W). (LPC11UXX only) */      
-  __O  uint32_t STARTRSRP1CLR;          /*!< Offset: 0x218 Start logic reset Register 0  ( /W). (LPC11UXX only) */
-  __IO uint32_t STARTSRP1;              /*!< Offset: 0x21C Start logic status Register 0 (R/W). (LPC11UXX only) */
-       uint32_t RESERVED17[4];
+       uint32_t RESERVED14[8];
 
   __IO uint32_t PDSLEEPCFG;             /*!< Offset: 0x230 Power-down states in Deep-sleep mode (R/W) */
   __IO uint32_t PDAWAKECFG;             /*!< Offset: 0x234 Power-down states after wake-up (R/W) */        
@@ -273,6 +271,7 @@ typedef struct
 } LPC_PMU_TypeDef;
 /*@}*/ /* end of group LPC11xx_PMU */
 
+
 /*------------- General Purpose Input/Output (GPIO) --------------------------*/
 /** @addtogroup LPC11xx_GPIO LPC11xx General Purpose Input/Output 
   @{
@@ -297,6 +296,7 @@ typedef struct
   __IO uint32_t IC;                     /*!< Offset: 0x801C Interrupt clear Register (R/W) */
 } LPC_GPIO_TypeDef;
 /*@}*/ /* end of group LPC11xx_GPIO */
+
 
 /*------------- Timer (TMR) --------------------------------------------------*/
 /** @addtogroup LPC11xx_TMR LPC11xx 16/32-bit Counter/Timer 
@@ -358,7 +358,7 @@ typedef struct
   __IO uint32_t  RS485CTRL;             /*!< Offset: 0x04C RS-485/EIA-485 Control Register (R/W) */
   __IO uint32_t  ADRMATCH;              /*!< Offset: 0x050 RS-485/EIA-485 address match Register (R/W) */
   __IO uint32_t  RS485DLY;              /*!< Offset: 0x054 RS-485/EIA-485 direction control delay Register (R/W) */
-  __I  uint32_t  FIFOLVL;               /*!< Offset: 0x058 FIFO Level Register (R) */
+  __I  uint32_t  FIFOLVL;               /*!< Offset: 0x058 FIFO Level Register (R/ ) */
 } LPC_UART_TypeDef;
 /*@}*/ /* end of group LPC11xx_UART */
 
@@ -416,11 +416,11 @@ typedef struct
 {
   __IO uint32_t MOD;                    /*!< Offset: 0x000 Watchdog mode register (R/W) */
   __IO uint32_t TC;                     /*!< Offset: 0x004 Watchdog timer constant register (R/W) */
-  __O  uint32_t FEED;                   /*!< Offset: 0x008 Watchdog feed sequence register (W) */
-  __I  uint32_t TV;                     /*!< Offset: 0x00C Watchdog timer value register (R) */
+  __O  uint32_t FEED;                   /*!< Offset: 0x008 Watchdog feed sequence register ( /W) */
+  __I  uint32_t TV;                     /*!< Offset: 0x00C Watchdog timer value register (R/ ) */
        uint32_t RESERVED0;
-  __IO uint32_t WARNINT;				/*!< Offset: 0x014 Watchdog timer warning int. register (R/W) */
-  __IO uint32_t WINDOW;					/*!< Offset: 0x018 Watchdog timer window value register (R/W) */
+  __IO uint32_t WARNINT;
+  __IO uint32_t WINDOW;
 } LPC_WDT_TypeDef;
 /*@}*/ /* end of group LPC11xx_WDT */
 
@@ -478,19 +478,19 @@ typedef struct
   __IO uint32_t IF2_DA2;
   __IO uint32_t IF2_DB1;
   __IO uint32_t IF2_DB2;
-       uint32_t RESERVED2[21];
+	   uint32_t RESERVED2[21];
   __I  uint32_t TXREQ1;				/* 0x100 */
   __I  uint32_t TXREQ2;
-       uint32_t RESERVED3[6];
+	   uint32_t RESERVED3[6];
   __I  uint32_t ND1;				/* 0x120 */
   __I  uint32_t ND2;
-       uint32_t RESERVED4[6];
+	   uint32_t RESERVED4[6];
   __I  uint32_t IR1;				/* 0x140 */
   __I  uint32_t IR2;
-       uint32_t RESERVED5[6];
+	   uint32_t RESERVED5[6];
   __I  uint32_t MSGV1;				/* 0x160 */
   __I  uint32_t MSGV2;
-       uint32_t RESERVED6[6];
+	   uint32_t RESERVED6[6];
   __IO uint32_t CLKDIV;				/* 0x180 */
 } LPC_CAN_TypeDef;
 /*@}*/ /* end of group LPC11xx_CAN */
@@ -524,7 +524,7 @@ typedef struct
 #define LPC_CAN_BASE          (LPC_APB0_BASE + 0x50000)
 #define LPC_SSP1_BASE         (LPC_APB0_BASE + 0x58000)
 
-/* AHB peripherals                                                            */
+/* AHB peripherals                                                            */	
 #define LPC_GPIO_BASE         (LPC_AHB_BASE  + 0x00000)
 #define LPC_GPIO0_BASE        (LPC_AHB_BASE  + 0x00000)
 #define LPC_GPIO1_BASE        (LPC_AHB_BASE  + 0x10000)

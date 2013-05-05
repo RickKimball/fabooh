@@ -12,33 +12,49 @@
  */
 
 #include <fabooh.h>
-#include <drivers/ws2811.h>
 #include <main.h>
+#include <drivers/ws2811.h>
 
-typedef led::WS2811<4, P1_0> ws2811; // this routine only works @16MHz
+static const unsigned num_leds=4; // configured for a strip of 4 leds * low power can run from usb
+typedef led::WS2811<num_leds, MOSI> ws2811; // this routine only works @16MHz on g2553, 12/24,48 on lpc1114
 
-const uint8_t frames[][12] = {
-    { 0x00,0x0f,0x00, /* red 50% */
-      0x0f,0x00,0x00, /* green 50% */
-      0x00,0x00,0x0f, /* blue 50% */
-      0x0f,0x0f,0x0f  /* white 50% */
+static const unsigned num_frames=4;
+const uint8_t frames[num_frames][12] = {
+    {
+       0x00,0x00,0x00 /* turn them all off */
+      ,0x00,0x00,0x00
+      ,0x00,0x00,0x00
+      ,0x00,0x00,0x00
     }
-   ,{ 0x00,0x7f,0x00, /* red 75% */
-      0x7f,0x00,0x00, /* green 75% */
-      0x00,0x00,0x7f, /* blue 75% */
-      0x7f,0x7f,0x7f  /* white 75% */
+    ,{
+      0x05,0x05,0x05  /* white 20% */
+      ,0x00,0x05,0x00 /* red 20% */
+      ,0x05,0x00,0x00 /* green 20% */
+      ,0x00,0x00,0x05 /* blue 20% */
+    }
+    ,{
+      0x5f,0x5f,0x5f  /* white 37d% */
+      ,0x00,0x5f,0x00 /* red 37% */
+      ,0x5f,0x00,0x00 /* green 37% */
+      ,0x00,0x00,0x5f /* blue 37% */
+    }
+    ,{
+      0xff,0xff,0xff  /* white 100% */
+      ,0x00,0xff,0x00 /* red 100% */
+      ,0xff,0x00,0x00 /* green 100% */
+      ,0x00,0x00,0xff /* blue 100% */
     }
 };
 
 inline void setup() {
-
   ws2811::begin();
 
   do {
-    ws2811::write(&frames[0][0]);
-    delay(300);
-    ws2811::write(&frames[1][0]);
-    delay(300);
+    unsigned framecnt=0;
+    do {
+      ws2811::write(&frames[framecnt][0]);
+      delay(500);
+    } while(++framecnt < num_frames);
   } while (1);
 
 }

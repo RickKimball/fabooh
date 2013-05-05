@@ -8,7 +8,7 @@
 #ifndef PINS_H_
 #define PINS_H_
 
-#include <lpc1100l.h>
+#include <LPC11xx.h>
 
 typedef GPIO_PORT_BASE<P0_PORTNO> P0;
 typedef GPIO_PIN<(1 << 0),P0> P0_0;

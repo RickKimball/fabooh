@@ -25,9 +25,8 @@ typedef unsigned char counter_t; /* type we use for counting from ' ' -> '~' */
 //------- file space globals ------
 namespace {
   const uint32_t BAUD_RATE=9600;
-  serial_default_t<BAUD_RATE, CPU::frequency, TX_PIN, RX_PIN> Serial; // xmit only serial
+  serial_default_t<BAUD_RATE, CPU::frequency, TX_PIN, NO_PIN> Serial; // xmit only serial
   counter_t thisByte=' '; // use the standard __do_data_copy() routines from libc
-
 }
 
 inline void setup(void)

@@ -3,10 +3,11 @@
 #
 
 TOOLCHAIN = arm-none-eabi-
+F_CPU ?= 48000000
 CORE = cortex-m0
 CORE_FLAGS = -mcpu=$(CORE) -mthumb
-C_DEFS = -DCORE_M0
-CXX_DEFS = -DCORE_M0
+C_DEFS = -DCORE_M0 -DFABOOH -DF_CPU=$(F_CPU)
+CXX_DEFS = -DCORE_M0 -DFABOOH -DF_CPU=$(F_CPU)
 AS_DEFS =
 LD_SCRIPT = $(FBD)$(BOARDDIR)/$(BOARD).ld
 LD_FLAGS = -T$(LD_SCRIPT) -g -Wl,-Map=$(OUT_DIR_F)$(PROJECT).map,--cref,--no-warn-mismatch

@@ -64,7 +64,7 @@ __attribute__ ((section(".vectors")))
 extern __vector __isr_vectors[16 + 32] = {
     /******  Cortex-M0 Processor Exceptions Numbers ***************************************************/
     (__vector ) &__stack    // -16 set the top of stack
-    , Reset_Handler              // -15 reset handler
+    , Reset_Handler         // -15 reset handler
     , NMI_Handler           // -14 The NMI handler
     , HardFault_Handler     // -13 The hard fault handler
     , 0                     // -12 Reserved

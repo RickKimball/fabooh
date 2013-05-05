@@ -33,11 +33,13 @@
 #ifndef UARTSERIAL_H
 #define UARTSERIAL_H
 
-#include <lpc1100l.h>
+#include <LPC11xx.h>
 
 template <const uint32_t BAUD, uint32_t MCLK_HZ, typename TXPIN, typename RXPIN>
 struct serial_base_uart_t {
-  static const uint32_t bit_cycles = (((MCLK_HZ / 1) / 2) / 16) / BAUD; // cycles/bit
+  static const uint32_t bit_cycles = MCLK_HZ/(BAUD*16); // cycles/bit
+  static const uint32_t divh = bit_cycles >> 8;    // div / 256;
+  static const uint32_t divl = bit_cycles & 0xff;  // div - (divh * 256);
 
   /**
    * begin(bps)  - initialize TX/RX pins
@@ -56,14 +58,25 @@ struct serial_base_uart_t {
     }
 
     LPC_SYSCON->SYSAHBCLKCTRL |= (1 << 12); //enable clock to UART (sec. 3.5.14)
-    LPC_SYSCON->UARTCLKDIV = 0x2;       // divided by 1
-
-    LPC_UART->LCR = 0x83;               //DLB=1, 8 bits, no Parity, 1 Stop bit
+    LPC_SYSCON->UARTCLKDIV = 1;       // divided by 1
 
     /* TODO: figure out fractional dividers */
-    LPC_UART->DLM = bit_cycles >> 8;    // bc / 256
-    LPC_UART->DLL = bit_cycles & 0xff;  // bc mod 256
+    LPC_UART->LCR = 0x83;               //DLB=1, 8 bits, no Parity, 1 Stop bit
+
+    // setup baud rate
+    if ( BAUD == 115200 ) {
+      LPC_UART->DLL = 4;
+      LPC_UART->DLM = 0;
+      LPC_UART->FDR = 0x05 | (0x08 << 4 ) | 0;
+    }
+    else {
+      LPC_UART->FDR = 0x00 | (1 << 4) | 0;
+      LPC_UART->DLL = divl;
+      LPC_UART->DLM = divh;
+    }
+
     LPC_UART->FCR = 0x07;               // Enable and reset TX and RX FIFO. (sec. 13.5.6)
+
     LPC_UART->LCR = 0x03;               // DLAB = 0 ,Disable access to divisor latches
 
     unsigned int temp = LPC_UART->LSR;  // Read to clear the line status. (sec. 13.5.9)

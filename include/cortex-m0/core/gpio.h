@@ -107,19 +107,19 @@ template <const portnos portno>
 struct GPIO_PORT_BASE {
     static const portnos _portno = portno;
 
-    ALWAYS_INLINE static LPC_GPIO_TypeDef *portdef() {
+    ALWAYS_INLINE static LPC_GPIO_TypeDef  & portdef() {
         if (_portno == P0_PORTNO ) {
-            return LPC_GPIO0;
+            return *LPC_GPIO0;
         }
         else if ( _portno == P1_PORTNO ) {
-            return LPC_GPIO1;
+            return *LPC_GPIO1;
         }
-        return LPC_GPIO1;
+        return *LPC_GPIO1;
     }
 
-    ALWAYS_INLINE static volatile uint32_t & PIN() { return portdef()->DATA; }
-    ALWAYS_INLINE static volatile uint32_t & POUT() { return portdef()->DATA; }
-    ALWAYS_INLINE static volatile uint32_t & PDIR() { return portdef()->DIR; }
+    ALWAYS_INLINE static volatile uint32_t & PIN() { return portdef().DATA; }
+    ALWAYS_INLINE static volatile uint32_t & POUT() { return portdef().DATA; }
+    ALWAYS_INLINE static volatile uint32_t & PDIR() { return portdef().DIR; }
 
   /**
    * pin direction configuration methods
@@ -148,6 +148,7 @@ struct GPIO_PORT_BASE {
   }
 
   ALWAYS_INLINE static void setmode_inputpulldown(const pin_width_t mask) {
+
   }
 
   ALWAYS_INLINE static void setmode_output(const pin_width_t mask ) {
