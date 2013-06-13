@@ -71,8 +71,8 @@ struct timer_base_timer_t {
   };
 
   // TODO: this is more flexible but still needs work to allow switching the ISR
-  static const timer_t<0, TA0CCTL0, TA0CCR0, TA0CTL, TA0R> rx_timer; // lowest ISR overhead P1.1
-  static const timer_t<1, TA0CCTL1, TA0CCR1, TA0CTL, TA0R> tx_timer; // higher ISR overhead P1.2
+  static const timer_t<0, TA0CCTL0, TA0CCR0, TA0CTL, TA0R> tx_timer; // lowest ISR overhead P1.2
+  static const timer_t<1, TA0CCTL1, TA0CCR1, TA0CTL, TA0R> rx_timer; // higher ISR overhead P1.1
 
   /*
    * ringbuffer - access routines
@@ -83,24 +83,24 @@ struct timer_base_timer_t {
 
   /**
    * begin( baud rate ) - initialize TX/RX pins
-   * Note: we assume a hardware pin setup unlike the original examples provided
-   *       from TI. P1.1 is RX and P1.2 is TX. This allows you to change from
-   *       Hardware UART to Timer base UART without changing the jumpers.
-   *       On an msp430 launchpad v1.4 you will have to change the code or
-   *       use jumper wires to cross the tx/rx pins.
+   * Note: we assume a software pin setup like the original examples provided
+   *       from TI. P1.1 is TX and P1.2 is RX.
+
+   *       On an msp430 launchpad v1.5 you will have to rotate the J3
+   *       RX/TX jumpers 90 degrees.
    */
   void begin(const uint32_t baud_ignored=BAUD /* not used */) {
     (void)baud_ignored; // warning avoidance
 
     if ( TXPIN::pin_mask ) {
-      P1DIR |= BIT2; // ignore silly pin hints :) use our own concept of TXPIN
+      TXPIN::setmode_output();
       // User controlled timer pin output
       tx_timer.CCTL() = OUT;
       (void)timera_tx_isr;           // reference ISR so it isn't garbage collected
     }
 
     if ( RXPIN::pin_mask ) {
-      P1DIR &= ~BIT1;
+      RXPIN::setmode_input();
       // Sync Latch TA0.0, Synchronize TACLK and MCLK, Detect Negative Edge, Enable Capture mode and RX Interrupt
       rx_timer.CCTL() = CCIS_0 | SCS | CM_2 | CAP | CCIE;
       (void)timera_rx_isr;           // reference ISR so it isn't garbage collected
@@ -108,13 +108,13 @@ struct timer_base_timer_t {
 
     // allow for output only and input only UART configs
     if ( RXPIN::pin_mask && TXPIN::pin_mask ) {
-      P1SEL |= BIT1|BIT2;
+      TXPIN::PSEL() |= (TXPIN::pin_mask | RXPIN::pin_mask);
     }
     else if ( TXPIN::pin_mask ) {
-      P1SEL |= BIT2;
+      TXPIN::PSEL() |= TXPIN::pin_mask;
     }
     else if ( RXPIN::pin_mask ) {
-      P1SEL |= BIT1;
+      RXPIN::PSEL() |= RXPIN::pin_mask;
     }
 
     // Clock TIMERA from SMCLK, run in continuous mode counting from to 0-0xFFFF, set TAR to 0
@@ -188,12 +188,16 @@ struct timer_base_timer_t {
   }
 
   /*
-   * timera_rx_isr - P1.1 TA0.0 handler
+   * timera_rx_isr - P1.2 TA0.1 handler
    */
 
-  __attribute__((interrupt(TIMER0_A0_VECTOR)))
+  __attribute__((interrupt(TIMER0_A1_VECTOR)))
   static void timera_rx_isr(void)
   {
+    volatile uint16_t resetTAIVIFG;   // just reading TAIV will reset the interrupt flag
+    resetTAIVIFG = TA0IV;
+    (void)resetTAIVIFG;
+
     if ( RXPIN::pin_mask ) {
       register uint16_t regCCTL = rx_timer.CCTL();  // using a register variable provides a slight performance improvement
 
@@ -217,15 +221,11 @@ struct timer_base_timer_t {
   }
 
   /*
-   * timera_tx_isr - P1.2 TA0.1 handler
+   * timera_tx_isr - P1.1 TA0.0 handler
    */
-  __attribute__((interrupt(TIMER0_A1_VECTOR)))
+  __attribute__((interrupt(TIMER0_A0_VECTOR)))
   static void timera_tx_isr(void)
   {
-    volatile uint16_t resetTAIVIFG;   // just reading TAIV will reset the interrupt flag
-    resetTAIVIFG = TA0IV;
-    (void)resetTAIVIFG;
-
     if ( TXPIN::pin_mask ) {
       tx_timer.CCR() += TICKS_PER_BIT;  // setup next time to send a bit, OUT will be set then
 
