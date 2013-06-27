@@ -38,7 +38,7 @@
 /*
  * tiny_rbuffer_t - really small ring buffer
  */
-typedef ringbuffer_t<uint8_t, 4> tiny_rbuffer_t;
+typedef ringbuffer_t<uint8_t, 16> tiny_rbuffer_t;
 
 /*
  * localize these variables to the compilation unit that includes it
@@ -179,7 +179,7 @@ struct timer_base_timer_t {
       tx_timer.CCR() += TICKS_PER_BIT;    // setup the next timer tick
       tx_timer.CCTL() = OUTMOD0 + CCIE;   // set TX_PIN HIGH and re-enable interrupts
 
-      register unsigned value = c | 0x100;  // add stop bit '11'
+      register unsigned value = c | 0x300;  // add stop bit '11'
       value <<= 1;                          // add the start bit '0'
       USARTTXBUF=value;                     // queue up the byte for send
     }
