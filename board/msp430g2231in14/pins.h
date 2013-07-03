@@ -95,7 +95,7 @@
  * setmode_input() - P2.6 XIN specialization
  */
 template<>
-inline void P2_6::setmode_input(void)
+ALWAYS_INLINE void P2_6::setmode_input(void)
 {
     P2SEL &= ~BIT6;
     P2DIR &= ~BIT6;
@@ -105,7 +105,7 @@ inline void P2_6::setmode_input(void)
  * setmode_output() - P2.6 XIN specialization
  */
 template<>
-inline void P2_6::setmode_output()
+ALWAYS_INLINE void P2_6::setmode_output()
 {
     P2SEL &= ~BIT6;
     P2DIR |= BIT6;
@@ -115,7 +115,7 @@ inline void P2_6::setmode_output()
  * setmode_input() - P2.7 XOUT specialization
  */
 template<>
-inline void P2_7::setmode_input(void)
+ALWAYS_INLINE void P2_7::setmode_input(void)
 {
     P2SEL &= ~BIT7;
     P2DIR &= ~BIT7;
@@ -125,7 +125,7 @@ inline void P2_7::setmode_input(void)
  * setmode_output() - P2.7 XOUT specialization
  */
 template<>
-inline void P2_7::setmode_output(void)
+ALWAYS_INLINE void P2_7::setmode_output(void)
 {
     P2SEL &= ~BIT7;
     P2DIR |= BIT7;
