@@ -31,7 +31,9 @@ PROVIDE (__infod = 0x1000);
 PROVIDE (__infoc = 0x1040);
 PROVIDE (__infob = 0x1080);
 PROVIDE (__infoa = 0x10c0);
-PROVIDE (__usercode = 0xc000);
+PROVIDE (__urom  = 0xc000);
+PROVIDE (__tos   = 0x0400);
+PROVIDE (__user_reset_vector = 0xffbe);
 
 /*
 PROVIDE (__bootaddr = 0xf800);

@@ -33,13 +33,15 @@
  * Look at linker map, you may have to adjust based on the
  * size of this code. These values are for an msp430g2553
  */
+
+extern unsigned __urom, __user_reset_vector;
 const unsigned INFOMEM_ADDR = 0x1000;
-const unsigned INFOMEM_END = 0x10c0-1;  // leave INFOA segment alone, just use INFOMEM D..B
-const unsigned GDB_ROMADDR = 0xc000;    // rom as in the ldscript sense
+const unsigned INFOMEM_END = 0x10c0-1;      // leave INFOA segment alone, just use INFOMEM D..B
 const unsigned GDB_LOADER_ADDR = 0xfa00;
 const unsigned GDB_BOOT_END = 0xfe00-1;
 const unsigned VECTOR_TABLE_SEGMENT = 0xfe00;
 const unsigned GDB_BOOT_RESET_VECTOR = 0xfffe;
+const unsigned USER_RESET_VECTOR = 0xffbe;
 const bool ERASE_INFO_MEM = true;
 
 #endif /* MEMCONFIG_H_ */

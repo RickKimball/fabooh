@@ -1,37 +1,38 @@
 Inspiration:
-So I'm looking at making a small msp430fr5739 based board. I was thinking
-that I would be able to use the msp430 launchpad to program them. However,
+I was looking at making a small msp430fr5739 based board. Originally I
+thought I would be able to use the msp430g2 launchpad to program them. However,
 I hit a snag in that they don't seem to recognize the msp430fr5739 as a
-valid device. I can use my FRAM boards to program them but not the $10
+valid device. I can use my msp430fr5720 launchpad to program them but not the $10
 launchpad. Then there was all the hubbub about the new msp430g2955 chips
 and it got me thinking. Why should I let Texas Instruments determine
 how I program my chips?
 
 Investigation:
-I got to looking at BSL and then got discouraged trying to find a client
-that works on windows, linux and OSX. It mostly seemed like it was going
-to be a hassle. Then I got to thinking about just using GDB and its
-Remote Serial Protocol. If you use msp430-gdb and mspdebug, you use this
-interface over a local server socket. However, an often unnoticed feature
-of this protocol is that it can also be used with a regular serial port.
+I spent some time looking at BSL and then got discouraged trying to find a client
+that works on Windows, linux and OSX. It mostly seemed like it was going
+to be a hassle. (although this has changed now as mspdebug works with serial BSL)
+Then I got to thinking about just using GDB and its Remote Serial Protocol. If
+you use msp430-gdb and mspdebug, you use this interface over a local server socket.
+However, an often unnoticed feature of this protocol is that it can also be used
+with a regular serial port.
 
 Solution:
-I decided to implement a gdb stub server that you load once on your msp430
-chip. You can think of it as a bootloader that happpens to use the Remote
-Serial Protocol. This allows you to load new programs on that chip without
-the need for a launchpad or an FET. All you need is a usb->serial port
-dongle. You can find these on ebay from $2-$10. They all go faster than
-the 9600 baud the virtual serial port the msp430 launchpad provides. It is
-likely you probably have one of these already. This scheme doesn't allow
-you to debug using msp430-gdb, but it does provide a way to load new code
-without having to deal with BSL or having to write any host side code.
+I decided to try and implement a gdb stub server on the msp430g2553 as a proof
+of concept. You load the gdb code in high memory on the msp430 chip. You can think
+of it as a bootloader that happpens to use the Remote Serial Protocol. This allows
+you to load new programs on that chip without the need for a launchpad or an FET.
+All you need is a dumb usb->serial port dongle. You can find these on ebay for
+about $2-$10. They all go faster than the 9600 baud the virtual serial port the
+msp430 g2 launchpad provides. It is likely you probably have one of these already.
+This scheme doesn't allow you to debug using msp430-gdb, but it does provide a way
+to load new code without having to deal with BSL or having to write any host side code.
 
 How it works:
 Load the attached code below on your chip one time. At this point,
 you could remove that chip from your launchpad and throw it on a
 breadboard. You just need power, the caps and a pull up resistor. Then
 connect TX and RX to a serial to USB converter (ftdi, cp102, pl2303hx,
-etc..). For simplicity, we can just test with the launchpad itself
+etc..). For simplicity, we can just test with the g2 launchpad itself
 and ignore the fact that there is an FET on the board and just use
 /dev/ttyACM0 or COM1: on windows.
 
@@ -42,7 +43,6 @@ up msp430-gdb to connect to the chip over a serial port. You can't debug,
 but what you can do is erase your flash and load a new program. The gdb
 server code sits at memory 0xfa00 -> 0xfdff so you do lose some of your
 flash. *I've done some optimization see later posts in this thread *
-
 
 The gdb_bootloader.elf file must be loaded on an msp430g2553. I'll post code
 and support for other chips at a later date. I'm excited about this

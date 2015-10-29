@@ -28,7 +28,7 @@
 FBD := $(dir $(lastword $(MAKEFILE_LIST)))
 
 # which board will be used as default
-BOARD ?= lpc1114fn28
+BOARD ?= msp430g2553_in20
 BOARDDIR = board/$(BOARD)
 BOARDS = $(notdir $(wildcard $(FBD)board/*))
 _3RD_PARTY_DIR = include/3rdparty

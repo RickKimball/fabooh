@@ -12,7 +12,7 @@
  *
  * To load new code after you install this on your chip run:
  *
- * $ msp430-gdb -b 9600 -ex 'target remote /dev/ttyACM0' yourcode.elf
+ * $ msp430-gdb -l 5 -b 9600 -ex 'target remote /dev/ttyACM0' yourcode.elf
  *
  * $ msp430-size gdb_bootloader.elf
  *    text    data     bss     dec     hex filename
@@ -46,6 +46,7 @@
 #include <serial.h>
 #include <string.h>
 #include "flashmgr.h"
+#include "msp430g2553in20/memconfig.h"
 
 #if 1 /* might need to comment this out to gain space for the software only UART */
 __attribute__((section(".copyr"),used))
@@ -72,22 +73,6 @@ union hex_work_t {
                      //     so 'F','A' becomes a uint8_t value of 0xfa
   };
 };
-
-/*
- * These are chip specific values that indicate the start
- * of flash and start of our gdb_bootloader code
- *
- * Look at linker map, you may have to adjust based on the
- * size of this code. These values are for an msp430g2553
- */
-const unsigned INFOMEM_ADDR = 0x1000;
-const unsigned INFOMEM_END = 0x10c0-1;  // leave INFOA segment alone, just use INFOMEM D..B
-const unsigned GDB_ROMADDR = 0xc000;    // rom as in the ldscript sense
-const unsigned GDB_LOADER_ADDR = 0xfa00;
-const unsigned GDB_BOOT_END = 0xfe00-1;
-const unsigned VECTOR_TABLE_SEGMENT = 0xfe00;
-const unsigned GDB_BOOT_RESET_VECTOR = 0xfffe;
-const bool ERASE_INFO_MEM = true;
 
 /*
  * hexstr2u16() - convert hex strings into uint16
@@ -138,16 +123,22 @@ void gdb_bootloader() {
 
   PUSH2::setmode_inputpullup();
 
+  // if user didn't press button P1.3, just run from the user reset vector
   if ( !PUSH2::is_low() ) {
+    register unsigned work_reg = USER_RESET_VECTOR; // check for valid user vector in flash hiding spot
+
+    // TODO: probably should reset clock and P1.3 button
+
     RED_LED::setmode_input();
-    // check to see if there is code at 0xc000, if not then just go into gdb server mode
-    __asm__ (
-        " mov.w #__usercode, r15 ; varies based on chip\n"
-        " cmp.w #0xffff,0(r15)   ; is there code there? or just erased bytes\n"
-        " jeq   run_gdb_boot     ; don't launch just start bootloader\n"
-        " mov.w r15, r0          ; jump to usercode, never return r0==PC\n"
-        "run_gdb_boot:           ;\n"
+    // check to see if there is code at user reset vector, if not, then go into gdb server mode
+
+    if ( *(uint16_t *)work_reg != 0xffff) {
+        __asm__ volatile (
+          " mov   #__tos,r1        ; reset stack pointer to top of ram\n"
+          " br    0(%0)            ; jump to user_reset_vector, never return\n"
+          : : "r" (work_reg)
         );
+    }
   }
 
   RED_LED::setmode_output();
@@ -269,11 +260,16 @@ void gdb_bootloader() {
           // check for the _reset_vector and our code range,
           // we don't modify flash in those ranges
           if ( addr < GDB_LOADER_ADDR ||  addr > GDB_BOOT_END ) {
+            chksum.data[0] = begin[0];
+            chksum.data[1] = begin[1];
             if ( addr != 0xfffe && addr != 0xffff ) { // check for writes to GDB_BOOT_RESET_VECTOR 0xfffe, 0xffff
               // reuse chcksum as a temporary buffer
-              chksum.data[0] = begin[0];
-              chksum.data[1] = begin[1];
               *(uint8_t *)addr = hexstr2u16(chksum.data); // FlashMgr::write_u8()...
+            }
+            else {
+              register uint8_t *hide_user_addr = (uint8_t *)addr-0xfffe;
+              hide_user_addr += USER_RESET_VECTOR;
+              *hide_user_addr = hexstr2u16(chksum.data);
             }
           }
           addr++;
@@ -305,7 +301,7 @@ void gdb_bootloader() {
        * $qRcmd,657261736520616c6c#2e
        */
       if ( chksum.data[3] == 0x2e) {
-        unsigned addr = GDB_ROMADDR;
+        unsigned addr = __urom;
 
         // erase main flash memory one 512 byte segment at a time
         // only erase main memory, preserve the boot loader code
