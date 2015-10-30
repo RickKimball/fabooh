@@ -2,10 +2,9 @@ This latest version of the gdb_bootloader code now works properly with TI binari
 However, you must enable the CCS eclipse output to Intel Hex feature.  Once enabled,
 CCS will create a projectname.hex file in the binary directory.
 
-Instead of using gdb 'load' commnand to upload to flash, you must use the gdb 'restore'
-command preceded with an 'eraseflash' command.  See the following example session
-that uploads some a project called tiblink using the generated hex file 'tiblink.hex'
-to flash:
+Instead of using the gdb 'load' commnand to upload to flash, you must use the gdb 'restore'
+command preceded by an 'eraseflash' command.  See the following example session
+that uploads the generated hex file 'tiblink.hex' to flash from a project called tiblink:
 
 $ msp430-gdb -l 2 -b 9600 -ex 'target remote /dev/ttyUSB0'
 GNU gdb (GDB) 7.2
