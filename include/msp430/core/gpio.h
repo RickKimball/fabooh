@@ -267,12 +267,25 @@ struct GPIO_PIN {
   }
 
   /*
+   * clear internal pullup resistor
+   */
+  ALWAYS_INLINE static void disable_pupd_resistor() {
+    PORT::PREN() &= ~MASK;
+  }
+
+  /*
+   * set internal pullup resistor
+   */
+  ALWAYS_INLINE static void enable_pupd_resistor() {
+    PORT::PREN() |= MASK;
+  }
+  /*
    *
    */
   ALWAYS_INLINE static void setmode_inputpullup() {
     PORT::PDIR() &= ~MASK;
     high();
-    PORT::PREN() |= MASK;
+    enable_pupd_resistor();
   }
 
   /*
@@ -281,7 +294,7 @@ struct GPIO_PIN {
   ALWAYS_INLINE static void setmode_inputpulldown() {
     PORT::PDIR() &= ~MASK;
     low();
-    PORT::PREN() |= MASK;
+    enable_pupd_resistor();
   }
 
   /*
