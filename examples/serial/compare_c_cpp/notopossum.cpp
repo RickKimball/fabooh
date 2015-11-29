@@ -28,7 +28,7 @@ void setup() {
     for (n = -5; n <= 5;) Serial << (n++) << " "; Serial << endl;
 
     n =  0xDEAD; Serial << _HEX(n) << " ";
-    n += 0xE042; Serial << _HEX(n) << endl;
+    n += 0xE042; Serial << _HEX(n) << endl << "\n";
   }
 }
 
