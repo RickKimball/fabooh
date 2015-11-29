@@ -48,7 +48,7 @@
 #include "flashmgr.h"
 #include "msp430g2553in20/memconfig.h"
 
-#if 1 /* might need to comment this out to gain space for the software only UART */
+#if 0 /* might need to comment this out to gain space for the software only UART */
 __attribute__((section(".copyr"),used))
 const char _copyright[] = {
     "Copyright \xC2\xA9 2013 Kimball Software"
@@ -127,8 +127,7 @@ void gdb_bootloader() {
   if ( !PUSH2::is_low() ) {
     register unsigned work_reg = USER_RESET_VECTOR; // check for valid user vector in flash hiding spot
 
-    // TODO: probably should reset clock and P1.3 button
-
+    PUSH2::disable_pupd_resistor();
     RED_LED::setmode_input();
     // check to see if there is code at user reset vector, if not, then go into gdb server mode
 
@@ -368,8 +367,9 @@ void gdb_bootloader() {
      */
     if ( rsp_data[0] == 'k') {
       Serial << "$#00";
-      Serial.flush();
+      Serial.end();
       WDTCTL = 0; // force a reset by using invalid WDT password
+      while(1);   // wait for reset
     }
 
     /*
