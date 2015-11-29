@@ -29,7 +29,7 @@
 #include <msp430.h>
 #include "cpu.h"
 
-template<unsigned long FREQ>
+template<const uint32_t FREQ>
 struct cpu430_bc2_t: cpu_base_t<F_CPU> {
   static const unsigned long MCLK_FREQ = FREQ;
 

@@ -33,7 +33,7 @@
  *
  * uint32_t FREQ - cpu frequency in Hz
  */
-template<uint32_t MCLK_FREQ>
+template<const uint32_t MCLK_FREQ>
 struct cpu_base_t {
     static const unsigned long frequency = MCLK_FREQ;
     static const unsigned long msec_cycles = frequency/1000;
@@ -45,7 +45,7 @@ struct cpu_base_t {
 #elif defined(__MSP430_HAS_CS__)
 #include "drivers/cpu430_cs.h"
 #else
-#error Unsupport CPU detected!
+#error Unsupported CPU detected!
 #endif
 
 #define delay_msecs(msec) __delay_cycles(CPU::msec_cycles * msec)
