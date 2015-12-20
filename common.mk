@@ -34,7 +34,8 @@ BOARDS = $(notdir $(wildcard $(FBD)board/*))
 _3RD_PARTY_DIR = include/3rdparty
 
 FIXMATH_FLAGS = -DFIXMATH_NO_CACHE -DFIXMATH_NO_64BIT -DFIXMATH_NO_ROUNDING
-FABOOH_FLAGS = $(FIXMATH_FLAGS)
+FABOOH_FLAGS = -DFABOOH
+FABOOH_FLAGS += $(FIXMATH_FLAGS)
 FABOOH_FLAGS += -fwrapv -fomit-frame-pointer
 
 #=============================================================================#
@@ -135,16 +136,13 @@ endif
 LISTING_FLAGS = -Wa,-ahlms=$(OUT_DIR_F)$(notdir $(<:.c=.lst))
 
 # flags for C++ compiler
-#CXX_FLAGS = -std=$(CXX_STD) -g -ggdb3 -fno-rtti -fno-exceptions -fverbose-asm $(LISTING_FLAGS)
-CXX_FLAGS = -std=$(CXX_STD) -g -ggdb3 -fno-rtti -fno-exceptions -fverbose-asm
+CXX_FLAGS = -std=$(CXX_STD) -g -fno-rtti -fno-exceptions -fverbose-asm
 
 # flags for C compiler
-#C_FLAGS = -std=$(C_STD) -g -ggdb3 -fverbose-asm -Wa,-ahlms=$(OUT_DIR_F)$(notdir $(<:.$(C_EXT)=.lst))
-C_FLAGS = -std=$(C_STD) -g -ggdb3 -fverbose-asm
+C_FLAGS = -std=$(C_STD) -g -fverbose-asm
 
 # flags for assembler
-#AS_FLAGS = -g -ggdb3 -Wa,-amhls=$(OUT_DIR_F)$(notdir $(<:.$(AS_EXT)=.lst))
-AS_FLAGS = -g -ggdb3
+AS_FLAGS =
 
 
 #=============================================================================#
@@ -252,7 +250,7 @@ $(DMP) : $(ELF)
 
 $(LSS) : $(ELF)
 	@echo 'Creating extended listing: $(LSS)'
-	$(OBJDUMP) -S $< > $@
+	$(OBJDUMP) -CS $< > $@
 	@echo ' '
 
 #-----------------------------------------------------------------------------#
