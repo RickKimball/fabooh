@@ -7,5 +7,5 @@ $ msp430-size opossum.elf
 
 $ msp430-size notopossum.elf 
  text    data     bss     dec     hex filename
-  494       0       0     494     1ee notopossum.elf
+  490       0       0     490     1ea notopossum.elf
 
