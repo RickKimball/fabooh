@@ -3,8 +3,8 @@
  *
  * Created: Nov-12-2012
  *  Author: rick@kimballsoftware.com
- *    Date: 03-04-2013
- * Version: 1.0.4
+ *    Date: 12-20-2015
+ * Version: 1.0.5
  *
  * Acknowledgments:
  *  Inspiration for cycle counting RX/TX routines from Kevin Timmerman.
@@ -40,7 +40,7 @@
  * serial_base_sw_t - blocking bit bang cycle counting UART
  *
  */
-template <uint32_t BAUD, uint32_t MCLK_HZ, typename TXPIN, typename RXPIN>
+template <const uint32_t BAUD, const uint32_t MCLK_HZ, typename TXPIN, typename RXPIN>
 struct serial_base_sw_t {
 
 // private
@@ -108,16 +108,16 @@ struct serial_base_sw_t {
  */
 template<uint32_t BAUD, uint32_t MCLK_HZ, typename TXPIN, typename RXPIN>
 void serial_base_sw_t<BAUD, MCLK_HZ, TXPIN, RXPIN>::_write(register unsigned c) {
-    register unsigned bit_dur = bit_rate.dur;
+    register unsigned bitrate_cycles = bit_rate.dur;
     register unsigned mask = TXPIN::pin_mask;
     register unsigned cnt = 0;
 
     c |= 0x300; // add stop bits
 
     __asm__ volatile (
-            "   jmp     3f                   ; Send start bit... (2)\n"
+            "   jmp     3f                   ; send start bit... (2)\n"
             "1:                              ;\n"
-            "   mov     %[bit_dur],%[cnt]    ; cycles Get bit duration (1)\n"
+            "   mov     %[brd],%[cnt]        ; set cnt to number of cycles for bitrate (1)\n"
             "2:                              ;\n"
             "   nop                          ; 4 cycles loop (1)\n"
             "   sub     #8, %[cnt]           ; (1)\n"
@@ -140,8 +140,8 @@ void serial_base_sw_t<BAUD, MCLK_HZ, TXPIN, RXPIN>::_write(register unsigned c) 
             [cnt] "+r" (cnt)
 
             : /* external variables */
-            [bit_dur] "r" (bit_dur),
-            [mask] "r" (mask), /* #BIT2  */
+            [brd] "r" (bitrate_cycles),
+            [mask] "r" (mask),          /* #BIT2  */
             [PXOUT] "m" (TXPIN::POUT()) /* &P1OUT */
 
             : /* _write() clobbers these registers */
@@ -156,49 +156,51 @@ void serial_base_sw_t<BAUD, MCLK_HZ, TXPIN, RXPIN>::_write(register unsigned c) 
 template<uint32_t BAUD, uint32_t MCLK_HZ, typename TXPIN, typename RXPIN>
 int serial_base_sw_t<BAUD, MCLK_HZ, TXPIN, RXPIN>::_read() {
     register unsigned result;
+    register unsigned bitrate_cycles = bit_rate.dur;
+    register unsigned work1 = RXPIN::pin_mask;
+    register unsigned work2;
 
     __asm__ volatile (
-            " mov     %[bit_dur], r14     ; Bit duration\n"
-            " mov     %[rx_bit_mask], r13 ; Input bitmask\n"
             " mov     #0x01FF, %[rc]      ; 9 bits - 8 data + stop\n"
             "1:                           ; Wait for start bit\n"
-            " mov.b   %[PXIN], r12        ; Get serial input\n"
-            " and     r13, r12            ; Mask and test bit\n"
+            " mov.b   %[PXIN], %[w02]     ; Read serial input pin value\n"
+            " and     %[w01], %[w02]      ; Mask and test bit\n"
             " jc      1b                  ; Wait for low...\n"
-            " mov     %[half_dur], r13    ; Wait for 1/2 bit time\n"
-            "2:                           ;\n"
+            " mov     %[brd_div2], %[w01] ; Wait for 1/2 bit time\n"
+            "2:                           ; \n"
             " nop                         ; Bit delay\n"
-            " sub     #8, r13             ; 1/2 bit adjust\n"
+            " sub     #8, %[w01]          ; 1/2 bit adjust\n"
             " jc      2b\n"
-            " subc    r13, r0             ; 0 to 3 cycle delay\n"
+            " subc    %[w01], r0          ; 0 to 3 cycle delay\n"
             " nop                         ; 3\n"
             " nop                         ; 2\n"
             " nop                         ; 1\n"
-            " mov.b   %[PXIN], r12        ; Get serial input\n"
-            " and     %[rx_bit_mask], r12 ;\n"
+            " mov.b   %[PXIN], %[w02]     ; Get serial input\n"
+            " and     %[rx_pin], %[w02]   ;\n"
             " rrc     %[rc]               ; Shift in a bit\n"
-            " mov     r14, r13            ; Setup bit timer\n"
+            " mov     %[brd], %[w01]      ; Setup bit timer\n"
             " jc      2b                  ; Next bit...\n"
             "3:                           ; exit\n"
             " rla     %[rc]               ; Move stop bit to carry\n"
             " swpb    %[rc]               ; Move rx byte to lower byte, start bit in msb\n"
 
             : /* return value */
-            [rc] "=r" (result)
+            [rc]  "=r" (result),
+            [brd] "+r" (bitrate_cycles),
+            [w01] "+r" (work1),
+            [w02] "=r" (work2)
             : /* external variables */
-            [bit_dur] "i" (bit_rate.dur),
-            [half_dur] "i" (bit_rate.dur_half),
-            [rx_bit_mask] "i" (RXPIN::pin_mask), /* #BIT1 */
-            [PXIN] "m" (RXPIN::PIN()) /* &P1IN */
+            [brd_div2] "i" (bit_rate.dur_half),
+            [rx_pin]   "i" (RXPIN::pin_mask),     /* #BIT1 */
+            [PXIN]     "m" (RXPIN::PIN())         /* &P1IN */
             : /* _read() clobbers these registers */
-            "r14", "r13", "r12"
     );
 
     return result;
 }
 
 // typical usage
-template <const uint32_t BAUD, uint32_t MCLK_HZ, typename TXPIN, typename RXPIN>
+template <const uint32_t BAUD, const uint32_t MCLK_HZ, typename TXPIN, typename RXPIN>
 struct sw_serial_t:
     serial_base_sw_t<BAUD,MCLK_HZ,TXPIN,RXPIN>,
     print_t<sw_serial_t<BAUD, MCLK_HZ, TXPIN, RXPIN> >
