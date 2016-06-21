@@ -1,30 +1,16 @@
 /**
- * ascii_table.cpp - ASCII table print using USCI serial template
- *
- * Note: the size of .elf is determined by typeof(counter_t)
- *
- * 468 bytes unsigned thisByte
- *   Writing  370 bytes at c000 [section: .text]...
- *   Writing   66 bytes at c172 [section: .rodata]...
- *   Writing   32 bytes at ffe0 [section: .vectors]...
- *
- * 498 bytes int8_t thisByte
- * 468 bytes uint8_t thisByte
- * 498 bytes int thisByte
- * 562 bytes unsigned long thisByte
- * 606 bytes long thisByte
- *
+ * feed_the_dog.cpp
  */
 
 #include <fabooh.h>
 #include <main.h>
 #include <serial.h>
 
-typedef unsigned char counter_t; /* type we use for counting from ' ' -> '~' */
-
 //------- file space globals ------
 namespace {
   const uint32_t BAUD_RATE=9600;
+
+  // pick only 1 serial implementation
 #if 0
   usci_serial_t<BAUD_RATE, CPU::frequency, TX_PIN, NO_PIN> Serial; // xmit only serial
 #elif 1
@@ -36,6 +22,7 @@ namespace {
 #else
   serial_default_t<BAUD_RATE, CPU::frequency, TX_PIN, NO_PIN> Serial; // xmit only serial
 #endif
+
   volatile unsigned int count = 0;
 }
 
@@ -102,3 +89,4 @@ void TIMER1_A0_ISR(void)
   LPM0_EXIT;
   count++;
 }
+
