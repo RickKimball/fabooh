@@ -27,6 +27,21 @@
 #ifndef GPIO_H_
 #define GPIO_H_
 
+#ifdef __GNUC__
+#define ALWAYS_INLINE inline __attribute__((always_inline))
+#define NEVER_INLINE __attribute__((noinline))
+#ifndef __always_inline
+#define __always_inline __attribute__((always_inline))
+#endif
+#ifndef __noinline
+#define __noinline __attribute__((noinline))
+#endif
+#else
+#define ALWAYS_INLINE inline
+#define NEVER_INLINE
+#warning This code takes advantage of features only found in msp430-gcc!!!
+#endif
+
 #include <logic.h>
 
 #define GPIO_VERSION 0x0100 /* 1.0 */
@@ -45,6 +60,11 @@ enum pin_mode {
   ,OUTPUT=0x01
   ,INPUT_PULLUP=0x02
   ,INPUT_PULLDOWN=0x04
+
+  ,TIMER_INPUT=0x1000
+  ,TIMER_OUTPUT=0x1100
+  ,UART_TX=0x1200
+  ,UART_RX=0x1400
 };
 
 enum pin_value {
@@ -65,76 +85,103 @@ template <
   ,u8_SFR pren
 >
 struct GPIO_PORT_BASE0 {
-  static u8_CSFR PIN()  { return pin;  }
-  static u8_SFR POUT()  { return pout; }
-  static u8_SFR PDIR()  { return pdir; }
-  static u8_SFR PSEL()  { return psel; }
-  static u8_SFR PREN()  { return pren; }
-  static yesno_e hasPSEL2() { return NO; }
-  static yesno_e hasInterrupt() { return NO; }
-  static const int _portno = portno;
+    static const int _portno = portno;
 
-  /**
-   * pin direction configuration methods
-   */
-  ALWAYS_INLINE static void set_mode(const uint8_t mask, pin_mode mode) {
-    if ( 0 ) {
+    static ALWAYS_INLINE u8_SFR POUT() { return pout; }
+    static ALWAYS_INLINE u8_CSFR PIN() { return pin; }
+    static ALWAYS_INLINE u8_SFR PSEL() { return psel; }
+
+    /**
+     * pin direction configuration methods
+     */
+    static ALWAYS_INLINE void setmode_input(const uint8_t pins_mask) {
+        pdir &= ~pins_mask;
     }
-    else if (mode == OUTPUT ) {
-      setmode_output(mask);
+
+    static ALWAYS_INLINE void setmode_inputpullup(const uint8_t pins_mask) {
+        pdir &= ~pins_mask;
+        set(pins_mask);
+        pren |= pins_mask;
     }
-    else if ( mode == INPUT ) {
-      setmode_input(mask);
+
+    static ALWAYS_INLINE void setmode_inputpulldown(const uint8_t pins_mask) {
+        pdir &= ~pins_mask;
+        clear(pins_mask);
+        pren |= pins_mask;
     }
-    else if (mode == INPUT_PULLUP) {
-        setmode_inputpullup(mask);
+
+    static ALWAYS_INLINE void setmode_output(const uint8_t pins_mask) {
+        pdir |= pins_mask;
     }
-    else if (mode == INPUT_PULLDOWN) {
-        setmode_inputpulldown(mask);
+
+    static ALWAYS_INLINE void set_mode(const uint8_t pins_mask, pin_mode mode) {
+        if (0) {
+        }
+        else if (mode == OUTPUT) {
+            setmode_output(pins_mask);
+        }
+        else if (mode == INPUT) {
+            setmode_input(pins_mask);
+        }
+        else if (mode == INPUT_PULLUP) {
+            setmode_inputpullup(pins_mask);
+        }
+        else if (mode == INPUT_PULLDOWN) {
+            setmode_inputpulldown(pins_mask);
+        }
     }
-  }
 
-  ALWAYS_INLINE static void setmode_input(const uint8_t mask) {
-    pdir &= ~mask;
-  }
+    /*
+     * port wide (8bits) get/set methods
+     */
+    static ALWAYS_INLINE void set_value(const uint8_t value) {
+        pout = value;
+    }
 
-  ALWAYS_INLINE static void setmode_inputpullup(const uint8_t mask) {
-    pdir &= ~mask; set_pins(mask); pren |= mask;
-  }
+    static ALWAYS_INLINE uint8_t get_value() {
+        return pin;
+    }
 
-  ALWAYS_INLINE static void setmode_inputpulldown(const uint8_t mask) {
-    pdir &= ~mask;  clear_pins(mask); pren |= mask;
-  }
+    static ALWAYS_INLINE void set(const uint8_t pins_mask) {
+        pout |= pins_mask;
+    }
 
-  ALWAYS_INLINE static void setmode_output(const uint8_t mask ) {
-    pdir |= mask;
-  }
+    static ALWAYS_INLINE void clear(const uint8_t pins_mask) {
+        pout &= ~pins_mask;
+    }
 
-  /*
-   * port wide (8bits) get/set methods
-   */
-  ALWAYS_INLINE static void set_value(const uint8_t value) {
-    pout = value;
-  }
+    static ALWAYS_INLINE void toggle(const uint8_t pins_mask) {
+        pout ^= pins_mask;
+    }
 
-  ALWAYS_INLINE static uint8_t get_value() {
-    return pin;
-  }
+    /*
+     * pin query functions
+     */
+    static ALWAYS_INLINE unsigned read(const uint8_t pin_mask) {
+        return (pin & pin_mask);
+    }
 
-  ALWAYS_INLINE static void set_pins(const uint8_t pin_mask) {
-    pout |= pin_mask;
-  }
+    /*
+     *
+     */
+    static ALWAYS_INLINE bool test(const uint8_t pin_mask) {
+        return (pin & pin_mask);
+    }
 
-  ALWAYS_INLINE static void clear_pins(const uint8_t pin_mask) {
-    pout &= ~pin_mask;
-  }
+    /*
+     *
+     */
+    static ALWAYS_INLINE unsigned is_low(const uint8_t pins_mask) {
+        return (pin & pins_mask) == 0 ? 1 : 0;
+    }
 
-  ALWAYS_INLINE static void toggle_pins(const uint8_t pin_mask) {
-    pout ^= pin_mask;
-  }
-
-  /* TODO: fix this PSEL2 not available on some PORTS */
-  /* TODO: devise generic scheme for setting alternate pin functions */
+    /*
+     *
+     */
+    static ALWAYS_INLINE unsigned is_high(const uint8_t pin_mask) {
+        return (pin & pin_mask) == pin_mask ? 1 : 0;
+    }
+    /* TODO: devise generic scheme for setting alternate pin functions */
 };
 
 /*
@@ -155,7 +202,6 @@ struct GPIO_PORT_BASE2 :
   GPIO_PORT_BASE0<portno,pin,pout,pdir,psel,pren>
 {
   static u8_SFR PSEL2() { return psel2; }
-  static yesno_e hasPSEL2() { return YES; }
 };
 
 /*
@@ -177,10 +223,11 @@ template <
 struct GPIO_PORT0 :
 GPIO_PORT_BASE0<portno,pin,pout,pdir,psel,pren>
 {
+  static volatile uint8_t _fakepsel;
+
   static u8_SFR PIFG()  { return pifg; }
   static u8_SFR PIES()  { return pies; }
   static u8_SFR PIE()   { return pie; }
-  static yesno_e hasInterrupt() { return YES; }
 
   /* TODO: implement decent pin interrupt ISR handlers () */
 };
@@ -219,23 +266,29 @@ struct GPIO_PORT :
  *       of a GPIO_PIN
  */
 template<
-  bool active_low = false
-  ,bool uart_tx_pin = false
-  ,bool uart_rx_pin = false
+   bool active_low   = false
+  ,bool uart_tx_pin  = false
+  ,bool uart_rx_pin  = false
   ,bool spi_sclk_pin = false
   ,bool spi_mosi_pin = false
   ,bool spi_mis0_pin = false
+  ,bool timer_out_pin = false
+  ,bool timer_in_pin = false
 >
 struct gpio_pincaps_t {
   static const bool is_active_low = active_low;
   static const bool canbe_uart_tx = uart_tx_pin;
   static const bool canbe_uart_rx = uart_rx_pin;
+  static const bool canbe_timer_out = timer_out_pin;
+  static const bool can_be_timer_in = timer_in_pin;
 };
 
 typedef gpio_pincaps_t<true> gpio_pin_button;
 typedef gpio_pincaps_t<true,true> gpio_pin_uart_tx;
 typedef gpio_pincaps_t<true,false,true> gpio_pin_uart_rx;
 typedef gpio_pincaps_t<false,false,false,true> gpio_pin_spi_sclk;
+typedef gpio_pincaps_t<false,false,false,false,false,false,true> gpio_pin_timer_tx;
+typedef gpio_pincaps_t<false,false,false,false,false,false,false,true> gpio_pin_timer_rx;
 
 /*
  * GPIO_PIN<> - pin template
@@ -248,107 +301,87 @@ struct GPIO_PIN {
   static const int _portno = PORT::_portno;
   typedef CAPS_T pin_cap;
 
-  static u8_CSFR PIN()  { return PORT::PIN();  }
-  static u8_SFR POUT()  { return PORT::POUT(); }
-  static u8_SFR PDIR()  { return PORT::PDIR(); }
-  static u8_SFR PSEL()  { return PORT::PSEL(); }
-  static u8_SFR PSEL2() { return PORT::PSEL2();}
-  static u8_SFR PREN()  { return PORT::PREN(); }
-
-  static u8_SFR PIFG()  { return PORT::PIFG(); }
-  static u8_SFR PIES()  { return PORT::PIES(); }
-  static u8_SFR PIE()   { return PORT::PIE(); }
+  static ALWAYS_INLINE u8_SFR POUT() { return PORT::POUT(); }
+  static ALWAYS_INLINE u8_CSFR PIN()  { return PORT::PIN();  }
+  static ALWAYS_INLINE u8_SFR PSEL() { return PORT::PSEL(); }
 
   /*
    * pin direction functions
    */
-  ALWAYS_INLINE static void setmode_input() {
-    PORT::PDIR() &= ~MASK;
-  }
-
-  /*
-   * clear internal pullup resistor
-   */
-  ALWAYS_INLINE static void disable_pupd_resistor() {
-    PORT::PREN() &= ~MASK;
-  }
-
-  /*
-   * set internal pullup resistor
-   */
-  ALWAYS_INLINE static void enable_pupd_resistor() {
-    PORT::PREN() |= MASK;
-  }
-  /*
-   *
-   */
-  ALWAYS_INLINE static void setmode_inputpullup() {
-    PORT::PDIR() &= ~MASK;
-    high();
-    enable_pupd_resistor();
+  static ALWAYS_INLINE void setmode_input() {
+      mode_gpio();
+      PORT::setmode_input(MASK);
   }
 
   /*
    *
    */
-  ALWAYS_INLINE static void setmode_inputpulldown() {
-    PORT::PDIR() &= ~MASK;
-    low();
-    enable_pupd_resistor();
+  static ALWAYS_INLINE void setmode_inputpullup() {
+      mode_gpio();
+      PORT::setmode_inputpullup(MASK);
   }
 
   /*
    *
    */
-  ALWAYS_INLINE static void setmode_output() {
-    PORT::PDIR() |= MASK;
+  static ALWAYS_INLINE void setmode_inputpulldown() {
+      mode_gpio();
+      PORT::setmode_inputpulldown(MASK);
   }
 
   /*
    *
    */
-  ALWAYS_INLINE static void set_mode(const pin_mode mode) {
-    if (0) {
-    }
-    else if (mode == OUTPUT) {
-      setmode_output();
-    }
-    else if (mode == INPUT) {
-      setmode_input();
-    }
-    else if (mode == INPUT_PULLUP) {
-      setmode_inputpullup();
-    }
-    else if (mode == INPUT_PULLDOWN) {
-      setmode_inputpulldown();
-    }
+  static ALWAYS_INLINE void setmode_output() {
+      mode_gpio();
+      PORT::setmode_output(MASK);
   }
+
+  /*
+   *
+   */
+  static ALWAYS_INLINE void set_mode(const pin_mode mode) {
+      // TBD provide core alt switch
+      PORT::set_mode(MASK,mode);
+  }
+
+  /*
+   * alt_functions - overrideable
+   */
+  static ALWAYS_INLINE void mode_gpio() {}
+
+  static ALWAYS_INLINE void mode_timer_out() {}
+  static ALWAYS_INLINE void mode_timer_in() {}
+
+  static ALWAYS_INLINE void mode_uart() {}
+  static ALWAYS_INLINE void mode_uart_rx() {}
+  static ALWAYS_INLINE void mode_uart_tx() {}
+
+  static ALWAYS_INLINE void mode_spi() {}
+  static ALWAYS_INLINE void mode_spi_clk() {}
+  static ALWAYS_INLINE void mode_spi_mosi() {}
+  static ALWAYS_INLINE void mode_spi_miso() {}
 
   /*
    * pin query functions
    */
-  ALWAYS_INLINE static unsigned read() {
-    return (PORT::PIN() & MASK ) != 0;
+
+  static ALWAYS_INLINE bool is_low() {
+      return !(PORT::test(MASK));
+  }
+
+  static ALWAYS_INLINE bool is_high() {
+      return (PORT::test(MASK));
+  }
+
+  static ALWAYS_INLINE bool read() {
+      return PORT::read(MASK) ? 1 : 0;
   }
 
   /*
    *
    */
-  ALWAYS_INLINE static unsigned is_low() {
-    return (PORT::PIN() & MASK ) == 0;
-  }
-
-  /*
-   *
-   */
-  ALWAYS_INLINE static unsigned is_high() {
-    return (PORT::PIN() & MASK ) != 0;
-  }
-
-  /*
-   *
-   */
-  ALWAYS_INLINE static unsigned is_pushed() {
+  static ALWAYS_INLINE unsigned is_pushed() {
     if ( pin_cap::is_active_low ) {
       return is_low();
     }
@@ -360,7 +393,7 @@ struct GPIO_PIN {
   /*
    * pin modification functions
    */
-  ALWAYS_INLINE static void write(pin_value value) {
+  static ALWAYS_INLINE void write(pin_value value) {
     if (value == HIGH) {
       high();
     }
@@ -372,52 +405,50 @@ struct GPIO_PIN {
   /*
    *
    */
-  ALWAYS_INLINE static void high() {
-    PORT::POUT() |= MASK;
+  static ALWAYS_INLINE void high() {
+      PORT::set(MASK);
   }
 
   /*
    *
    */
-  ALWAYS_INLINE static void low() {
-    if ( MASK )
-      PORT::POUT() &= ~MASK;
+  static ALWAYS_INLINE void low() {
+      PORT::clear(MASK);
   }
 
   /*
    *
    */
-  ALWAYS_INLINE static void toggle() {
-    if ( MASK )
-      PORT::POUT() ^= MASK;
+  static ALWAYS_INLINE void toggle() {
+      PORT::toggle(MASK);
   }
 
   /*
    * port wide (8bits) set direction using pin as port
    */
-  ALWAYS_INLINE static void set_modes(const uint8_t pins_mask, pin_mode mode) {
+  static ALWAYS_INLINE void set_modes(const uint8_t pins_mask, pin_mode mode) {
     PORT::set_mode(pins_mask, mode);
   }
 
   /*
    * port wide (8bits) modifications using pin as port
    */
-  ALWAYS_INLINE static void set_pins(const uint8_t pins_mask) {
-    PORT::POUT() |= pins_mask;
+  static ALWAYS_INLINE void set_pins(const uint8_t pins_mask) {
+      PORT::set(pins_mask);
   }
 
   /*
    *
    */
-  ALWAYS_INLINE static void clear_pins(const uint8_t pins_mask) {
-    PORT::POUT() &= ~pins_mask;
+  static ALWAYS_INLINE void clear_pins(const uint8_t pins_mask) {
+      PORT::clear(pins_mask);
   }
 
   /*
    *
    */
-  ALWAYS_INLINE static void toggle_pins(const uint8_t pins_mask) {
-    PORT::POUT() ^= pins_mask;
+  static ALWAYS_INLINE void toggle_pins(const uint8_t pins_mask) {
+      PORT::toggle(pins_mask);
   }
 
   /* TODO: fix this, not all pins have interrupt capability */
@@ -459,8 +490,14 @@ struct DummyGPIO {
     static uint8_t PINMASK() { return 0; }
 
     static void set_mode(const uint8_t, pin_mode) {}
-    static const int _portno = 0;
+    //static const int _portno = 0;
   } port;
+  static volatile uint8_t _psel;
+  static volatile uint8_t _fake_pin;
+
+  static u8_SFR PSEL() { return (u8_SFR)_psel; }
+  static u8_SFR PSEL2() { return (u8_SFR)_psel; }
+  static u8_SFR PIN() { return (u8_SFR)_fake_pin; }
 
   static const uint8_t pin_mask=0;
   static const int _portno = 0;
