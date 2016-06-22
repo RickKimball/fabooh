@@ -90,6 +90,7 @@ struct GPIO_PORT_BASE0 {
     static ALWAYS_INLINE u8_SFR POUT() { return pout; }
     static ALWAYS_INLINE u8_CSFR PIN() { return pin; }
     static ALWAYS_INLINE u8_SFR PSEL() { return psel; }
+    static ALWAYS_INLINE u8_SFR PREN() { return pren; }
 
     /**
      * pin direction configuration methods
@@ -130,7 +131,7 @@ struct GPIO_PORT_BASE0 {
             setmode_inputpulldown(pins_mask);
         }
     }
-
+  
     /*
      * port wide (8bits) get/set methods
      */
@@ -345,6 +346,19 @@ struct GPIO_PIN {
       PORT::set_mode(MASK,mode);
   }
 
+  /*
+   *
+   */
+  static ALWAYS_INLINE void disable_pupd_resistor() {
+    PORT::PREN() &= ~MASK;
+  }
+
+  /*
+   *
+   */
+  static ALWAYS_INLINE void enable_pupd_resistor() {
+    PORT::PREN() |= MASK;
+  }
   /*
    * alt_functions - overrideable
    */
