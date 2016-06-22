@@ -10,6 +10,8 @@
 #include <main.h>
 #include <serial.h>
 
+#define SYSTICK (1000/10)  /* ~10ms */
+
 volatile unsigned count;
 
 sw_serial_t<9600, CPU::frequency, TX_PIN, NO_PIN> Serial;
@@ -19,24 +21,25 @@ inline void setup(void)
   Serial.begin();
   Serial << "\r\nRESET!\n";
 
-  /* ADC */
+  /* ADC on P1.5 */
   P1_5::PSEL();
   ADC10CTL0 &= ~ENC;
-  ADC10CTL1 = INCH_5 | ADC10DIV_3 ;
-  ADC10CTL0 = SREF_0 | ADC10SHT_3 | ADC10ON;
-  ADC10AE0 |= BIT5;
+  ADC10CTL1 = INCH_5 | ADC10DIV_3 ;          // Select A5, ADC10CLK/4
+  ADC10CTL0 = SREF_0 | ADC10SHT_3 | ADC10ON; // Vr+ = Vcc / Vr- = Vss, 64 x ADC10CLKs, ADC10 On
+  ADC10AE0 |= BIT5;                          // Enable ADC input P1.5
 
   /* Timer0 A0*/
-  TA0CCR0 = (CPU::frequency*.010 )/8;     // Count overflow frequency ~10ms
-  TA0CTL = TASSEL_2 | ID_3 | MC_1;        // SMCLK / 8  upmode
+  TA0CCR0 = (CPU::frequency/SYSTICK)/8;  // Count overflow frequency ~10ms
+  TA0CTL = TASSEL_2 | ID_3 | MC_1;       // SMCLK/8 in upmode
   TA0CCTL0 = CCIE;
 
-  __bis_SR_register(LPM0_bits|GIE);
+  __bis_SR_register(LPM0_bits|GIE);      // Sleep with interrupts enabled
 }
 
 void loop()
 {
-  WDTCTL = WDTPW | WDTCNTCL;
+  WDTCTL = WDTPW|WDTCNTCL;               // feed the wdt, ~32ms timeout from SMCLK
+
   if (count > 99) {                      // ~1 Second
     count = 0;
     __delay_cycles(125);                 // Let the pins settle
@@ -57,7 +60,7 @@ void TIMER0_A0_ISR(void)
  ++count;
 
   if ( !(ADC10CTL1 & ADC10BUSY) ) {
-  	LPM0_EXIT;
+    LPM0_EXIT;
   }
 }
 
