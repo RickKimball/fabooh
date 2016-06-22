@@ -54,7 +54,7 @@ namespace {
 /*
  * timer_base_timer_t - TimerA based UART
  */
-template <uint32_t BAUD, uint32_t MCLK_HZ, typename TXPIN, typename RXPIN, typename RB_T, RB_T& RB>
+template <const uint32_t BAUD, const uint32_t MCLK_HZ, typename TXPIN, typename RXPIN, typename RB_T, RB_T& RB>
 struct timer_base_timer_t {
   static const uint16_t TICKS_PER_BIT = (MCLK_HZ + (BAUD >> 1))/BAUD;
   static const uint16_t TICKS_PER_BIT_DIV2 = TICKS_PER_BIT >> 1;
@@ -160,9 +160,8 @@ struct timer_base_timer_t {
           return rb_pop_front();
         }
       } while (1);
-
-      return -1;
     }
+    return -1;
   }
 
   /*
@@ -242,7 +241,7 @@ struct timer_base_timer_t {
 
 };
 
-template <uint32_t BAUD, uint32_t MCLK_HZ,
+template <const uint32_t BAUD, const uint32_t MCLK_HZ,
           typename TXPIN, typename RXPIN,
           typename RB_T=tiny_rbuffer_t, RB_T& RB=rx_buffer>
 struct timer_serial_t:

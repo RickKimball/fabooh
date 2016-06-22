@@ -34,7 +34,7 @@
 //------------------------------------------------------------------------
 // mix-in some serial and print to form a working serial class
 
-template <uint32_t BAUD, uint32_t MCLK_HZ,
+template <const uint32_t BAUD, const uint32_t MCLK_HZ,
           typename TXPIN, typename RXPIN>
 struct serial_default_t:
 #if defined(__MSP430_HAS_USCI__)

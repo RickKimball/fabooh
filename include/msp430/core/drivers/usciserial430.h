@@ -35,7 +35,7 @@
 
 #ifdef __MSP430_HAS_USCI__
 
-template <uint32_t BAUD, uint32_t MCLK_HZ, typename TXPIN, typename RXPIN>
+template <const uint32_t BAUD, const uint32_t MCLK_HZ, typename TXPIN, typename RXPIN>
 struct serial_base_usci_t {
 
   /**
