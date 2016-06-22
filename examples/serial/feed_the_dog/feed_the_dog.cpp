@@ -3,7 +3,11 @@
  *
  * msp430-size msp430g2553in20_release/feed_the_dog.elf
  *   text     data      bss      dec      hex  filename
- *    432        0        6      438      1b6  msp430g2553in20_release/feed_the_dog.elf
+ *    428        0        6      434      1b2  msp430g2553in20_release/feed_the_dog.elf
+ *
+ * msp430-size msp430g2231in14_release/feed_the_dog.elf
+ *   text     data      bss      dec      hex  filename
+ *    428        0        6      434      1b2  msp430g2231in14_release/feed_the_dog.elf
  */
 
 #include <fabooh.h>
