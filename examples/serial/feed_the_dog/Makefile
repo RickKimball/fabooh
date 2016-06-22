@@ -2,7 +2,7 @@
 # fabooh blink makefile
 #
 
-PROJECT=my_app
+PROJECT=feed_the_dog
 MCLK_FREQ=1000000UL
 
 include ../../../common.mk
