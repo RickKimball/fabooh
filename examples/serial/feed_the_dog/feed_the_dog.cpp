@@ -3,7 +3,7 @@
  *
  * msp430-size msp430g2553in20_release/feed_the_dog.elf
  *  text     data      bss      dec      hex  filename
- *   406        0        6      412      19c  msp430g2553in20_release/feed_the_dog.elf
+ *   416        0        6      422      1a6  msp430g2553in20_release/feed_the_dog.elf
  */
 
 #include <fabooh.h>
@@ -11,7 +11,7 @@
 #include <serial.h>
 
 volatile unsigned int count = 0;
-serial_default_t<9600, CPU::frequency, TX_PIN, NO_PIN> Serial;
+sw_serial_t<9600, CPU::frequency, TX_PIN, NO_PIN> Serial;
 
 inline void setup(void)
 {
