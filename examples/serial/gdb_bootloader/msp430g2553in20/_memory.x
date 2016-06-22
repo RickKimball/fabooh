@@ -9,8 +9,8 @@ MEMORY {
   infob            : ORIGIN = 0x1080, LENGTH = 0x0040 /* END=0x10c0, size 64 */
   infoa            : ORIGIN = 0x10c0, LENGTH = 0x0040 /* END=0x1100, size 64 */
   urom (rx)        : ORIGIN = 0xc000, LENGTH = 0x3800 /* END=0xf200, size 14336 */
-  rom (rx)         : ORIGIN = 0xfa00, LENGTH = 0x0400 /* END=0xfe00, size 1024 sadly we have 480 byte gap */
-  vectorseg (rx)   : ORIGIN = 0xfe00, LENGTH = 0x01e0 /* END=0xffe0, size 480 */
+  rom (rx)         : ORIGIN = 0xfa00, LENGTH = 0x0400 /* END=0xfdff, size 1024 sadly we have 480 byte gap */
+  vectorseg (rx)   : ORIGIN = 0xfe00, LENGTH = 0x01e0 /* END=0xffdf, size 480 */
   vectors          : ORIGIN = 0xffe0, LENGTH = 0x0020 /* END=0x10000, size 32 as 16 2-byte segments */
   /* Remaining banks are absent */
   bsl              : ORIGIN = 0x0000, LENGTH = 0x0000
