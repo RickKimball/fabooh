@@ -20,17 +20,19 @@
 #include <main.h>
 #include <serial.h>
 
-typedef unsigned char counter_t; /* type we use for counting from ' ' -> '~' */
+typedef uint16_t counter_t; /* type we use for counting from ' ' -> '~' */
 
 //------- file space globals ------
 namespace {
-  const uint32_t BAUD_RATE=9600;
+  static const uint32_t BAUD_RATE=9600;
 #if 0
   usci_serial_t<BAUD_RATE, CPU::frequency, TX_PIN, NO_PIN> Serial; // xmit only serial
 #elif 0
   sw_serial_t<BAUD_RATE, CPU::frequency, TX_PIN, NO_PIN> Serial; // xmit only serial
 #elif 0
-  timer_serial_t<BAUD_RATE, CPU::frequency, TX_PIN, NO_PIN> Serial; // xmit only serial
+  sw_serial_t<BAUD_RATE, CPU::frequency, P1_1, NO_PIN> Serial; // xmit only serial
+#elif 0
+  timer_serial_t<BAUD_RATE, CPU::frequency, P1_1, NO_PIN> Serial; // xmit only serial
 #else
   serial_default_t<BAUD_RATE, CPU::frequency, TX_PIN, NO_PIN> Serial; // xmit only serial
 #endif
@@ -39,11 +41,7 @@ namespace {
 
 inline void setup(void)
 {
-  thisByte=' '; // first visible ASCII character ' ' is number 32:
-
-  // Initialize serial port pins. Note: speed is ignored here just for documentation
-  // change the baud rate in the template definition
-  Serial.begin(BAUD_RATE);
+  Serial.begin();
 
   delay(250);
 
