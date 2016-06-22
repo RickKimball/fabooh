@@ -27,8 +27,10 @@ namespace {
   const uint32_t BAUD_RATE=9600;
 #if 0
   usci_serial_t<BAUD_RATE, CPU::frequency, TX_PIN, NO_PIN> Serial; // xmit only serial
-#elif 1
+#elif 0
   sw_serial_t<BAUD_RATE, CPU::frequency, TX_PIN, NO_PIN> Serial; // xmit only serial
+#elif 0
+  timer_serial_t<BAUD_RATE, CPU::frequency, TX_PIN, NO_PIN> Serial; // xmit only serial
 #else
   serial_default_t<BAUD_RATE, CPU::frequency, TX_PIN, NO_PIN> Serial; // xmit only serial
 #endif
