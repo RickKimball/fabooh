@@ -10,12 +10,14 @@
 #include <main.h>
 #include <serial.h>
 
-volatile unsigned int count = 0;
+volatile unsigned count;
+
 sw_serial_t<9600, CPU::frequency, TX_PIN, NO_PIN> Serial;
 
 inline void setup(void)
 {
   Serial.begin();
+  Serial << "\r\nRESET!\n";
 
   /* ADC */
   P1_5::PSEL();
@@ -24,49 +26,43 @@ inline void setup(void)
   ADC10CTL0 = SREF_0 | ADC10SHT_3 | ADC10ON;
   ADC10AE0 |= BIT5;
 
-  /* Timer1 A0*/
-  TA1CCR0 = (CPU::frequency*.010 )/8;     // Count overflow frequency ~10ms
-  TA1CTL = TASSEL_2 | ID_3 | MC_1;        // SMCLK / 8  upmode
-  TA1CCTL0 = CCIE;
+  /* Timer0 A0*/
+  TA0CCR0 = (CPU::frequency*.010 )/8;     // Count overflow frequency ~10ms
+  TA0CTL = TASSEL_2 | ID_3 | MC_1;        // SMCLK / 8  upmode
+  TA0CCTL0 = CCIE;
 
-  __enable_interrupt();
-  WDTCTL = WDTPW | WDTCNTCL;              // Enable WDT
-  Serial << "\r\nreset...\n";
+  __bis_SR_register(LPM0_bits|GIE);
 }
 
 void loop()
 {
-  unsigned sample;
-
-  LPM0;
   WDTCTL = WDTPW | WDTCNTCL;
-  
-  if (count > 100) {                      // ~1 Second
-    count = 1;
-    __delay_cycles(128);                  // Let the pins settle
-    ADC10CTL0 |= ENC | ADC10SC;           // Sampling and conversion start
+  if (count > 99) {                      // ~1 Second
+    count = 0;
+    __delay_cycles(125);                 // Let the pins settle
+    ADC10CTL0 |= (ENC|ADC10SC);          // Sampling and conversion start
     while(ADC10CTL1 & ADC10BUSY) {
-      LPM0;                               // Sleep until ADC done
-    }
-    sample = ADC10MEM;
+      LPM0;                              // Sleep until ADC done
+   }
+    unsigned sample = ADC10MEM;
 
     Serial << sample << "    \r";
   }
+  LPM0;
 }
 
-__attribute__( (interrupt(TIMER1_A0_VECTOR)) )
-void TIMER1_A0_ISR(void)
+__attribute__((interrupt(TIMER0_A0_VECTOR)))
+void TIMER0_A0_ISR(void)
 {
-  count++;
+ ++count;
 
   if ( !(ADC10CTL1 & ADC10BUSY) ) {
   	LPM0_EXIT;
   }
 }
 
-__attribute__( (interrupt(ADC10_VECTOR)) )
+__attribute__((interrupt(ADC10_VECTOR)))
 void ADC10_ISR(void)
 {
   LPM0_EXIT;
 }
-
