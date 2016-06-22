@@ -2,8 +2,8 @@
  * feed_the_dog.cpp - an msp430g2xxx specific watchdog timer example
  *
  * msp430-size msp430g2553in20_release/feed_the_dog.elf
- *  text     data      bss      dec      hex  filename
- *   416        0        6      422      1a6  msp430g2553in20_release/feed_the_dog.elf
+ *   text     data      bss      dec      hex  filename
+ *    432        0        6      438      1b6  msp430g2553in20_release/feed_the_dog.elf
  */
 
 #include <fabooh.h>
@@ -43,13 +43,13 @@ void loop()
   
   if (count > 100) {                      // ~1 Second
     count = 1;
-    __delay_cycles(128);                  // let the pins settle
+    __delay_cycles(128);                  // Let the pins settle
     ADC10CTL0 |= ENC | ADC10SC;           // Sampling and conversion start
-    while (ADC10CTL1 & ADC10BUSY) {       // sleep and wait for completion
-      asm("nop");
+    while(ADC10CTL1 & ADC10BUSY) {
+      LPM0;                               // Sleep until ADC done
     }
     sample = ADC10MEM;
-    
+
     Serial << sample << "    \r";
   }
 }
@@ -57,7 +57,16 @@ void loop()
 __attribute__( (interrupt(TIMER1_A0_VECTOR)) )
 void TIMER1_A0_ISR(void)
 {
-  LPM0_EXIT;
   count++;
+
+  if ( !(ADC10CTL1 & ADC10BUSY) ) {
+  	LPM0_EXIT;
+  }
+}
+
+__attribute__( (interrupt(ADC10_VECTOR)) )
+void ADC10_ISR(void)
+{
+  LPM0_EXIT;
 }
 
