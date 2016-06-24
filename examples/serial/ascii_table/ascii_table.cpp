@@ -17,10 +17,11 @@
  */
 
 #include <fabooh.h>
+#define SMALL_INIT4
 #include <main.h>
 #include <serial.h>
 
-typedef uint16_t counter_t; /* type we use for counting from ' ' -> '~' */
+typedef uint8_t counter_t; /* type we use for counting from ' ' -> '~' */
 
 //------- file space globals ------
 namespace {
@@ -36,18 +37,16 @@ namespace {
 #else
   serial_default_t<BAUD_RATE, CPU::frequency, TX_PIN, NO_PIN> Serial; // xmit only serial
 #endif
-  counter_t thisByte=' '; // use the standard __do_data_copy() routines from libc
+  counter_t thisByte; // use the standard __do_data_copy() routines from libc
 }
 
 inline void setup(void)
 {
   Serial.begin();
 
-  delay(250);
-
   // prints title with ending line break
   Serial.print("\nASCII Table ~ Character Map\n");
-
+  thisByte=' ';
 }
 
 void loop()
