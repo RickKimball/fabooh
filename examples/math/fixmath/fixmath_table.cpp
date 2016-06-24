@@ -17,10 +17,25 @@
 namespace {
   const uint32_t BAUD_RATE = 9600;
   typedef serial_default_t<BAUD_RATE, CPU::frequency, TX_PIN, NO_PIN> serial; /* TX=P?.? varies, RX=NO_PIN */
+  serial Serial;
 };
 
+#if defined(__MSP430G2231__)
+
 inline void setup() {
-  serial Serial;
+
+  Serial.begin(BAUD_RATE);
+
+  Serial << "Sorry, this chip doesn't have enough flash memory to run the sin_table sample" << endl;
+
+  while(1);
+}
+
+void loop() {}
+
+#else
+
+inline void setup() {
 
   Serial.begin(BAUD_RATE);
   Fix16 angle; // use fix16_t for calculations
@@ -39,3 +54,5 @@ inline void setup() {
 }
 
 void loop() {}
+
+#endif /* weed out small chips */

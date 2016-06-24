@@ -19,8 +19,7 @@ namespace {
   serial Serial;
 };
 
-#if defined(__MSP430G2231__) || defined(__MPS430G2452__)
-
+#if defined(__MSP430G2231__) || defined(__MSP430G2452__)
 inline void setup() {
 
   Serial.begin(BAUD_RATE);
