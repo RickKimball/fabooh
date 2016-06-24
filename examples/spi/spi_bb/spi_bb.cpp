@@ -7,7 +7,6 @@
 #include <fabooh.h>
 #include <main.h>
 #include <spi.h>
-#include <drivers/spi_bitbang.h>
 
 #if defined(__MSP430G2553__)
 
