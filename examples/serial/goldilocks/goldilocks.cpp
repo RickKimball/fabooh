@@ -53,7 +53,7 @@
 #include <main.h>
 #include <serial.h>
 
-#ifndef __MSP430G2553__
+#if 0
 
  void setup() {} // only works for msp430g2553
  void loop() {}
@@ -74,22 +74,34 @@ volatile unsigned bit_indx;
 void setup(void) {
   serial_default_t<bps,CPU::frequency,TX_PIN,NO_PIN> Serial;
 
+#if 0
   BCSCTL1 = *(uint8_t *)(0x10F9);
   DCOCTL  = *(uint8_t *)(0x10F8);
+#endif
 
-#define TWEAK_DCO 1 /* to adjust DCO frequency */
-#if defined(TWEAK_DCO) && TWEAK_DCO == 1
+#define TWEAK_DCO 0 /* to adjust DCO frequency */
+#if defined(TWEAK_DCO) && TWEAK_DCO // this is best 16MHz setting for my chip
   DCOCTL = 0xAA; // this is best 16MHz setting for my chip
 #endif
 
   Serial.begin(bps);
 
+#ifdef __MSP430G2553__
   P1_1::setmode_inputpullup();
   P1_1::PSEL() |= P1_1::pin_mask; // configure as CCI0A timera input
 
   TA0CCTL0 = CM_3 | CCIS_0 | SCS | CAP | CCIE; /* Both edges, CCI0A (P1.1), synchronous, capture, interrupt enable */
   TA0CTL = TASSEL_2 | ID_0 | MC_2 | TACLR;     /* SMCLK,  / by 1, continuous, clear TAR */
+#else
+  // this works for g2231 and g2452
+  P1_2::setmode_inputpullup();
+  P1_2::PSEL() |= P1_2::pin_mask; // configure as CCI0A timera input
 
+  TA0CCTL1 = CM_3 | CCIS_0 | SCS | CAP | CCIE; /* Both edges, CCI0A (P1.1), synchronous, capture, interrupt enable */
+  TA0CTL = TASSEL_2 | ID_0 | MC_2 | TACLR;     /* SMCLK,  / by 1, continuous, clear TAR */
+#endif
+
+  CPU::enable_clkout();
   __enable_interrupt();
 }
 
@@ -109,7 +121,8 @@ void loop() {
     LPM0;
 
     // display results
-    uint16_t i, avg=0, mask=0x01;
+    uint16_t i, mask=0x01;
+    uint32_t avg=0;
 
     Serial << "bit val ts  duration" << endl;
     for (i = 0; i < bit_indx; i++) {
@@ -128,7 +141,7 @@ void loop() {
     // compute tweaks to the DCO to make it more accurate
     // you will probably run this multiple times to get it right
 
-    avg /= howmany-1;
+    avg = (((avg+5)*10)/(howmany-1))/10;
 
     Serial << endl
            << "ideal bit duration is: " << bit_duration << endl;
@@ -146,12 +159,14 @@ void loop() {
         Serial << "Your DCO is too hot, add this line to your setup():\n" << endl
                << "  DCOCTL=0x" << _HEX(DCOCTL-1) << "; // slightly slower" << endl;
     }
+    Serial << "  // BCSCTL1=0x" << _HEX(BCSCTL1) << "; // your current BCSCTL1 setting" << endl;
     Serial << "  // DCOCTL=0x" << _HEX(DCOCTL) << "; // your current DCOCTL setting" << endl;
 }
 
 /*
  * capture edge change times from P1_1
  */
+#ifdef __MSP430G2553__
 __attribute__ ((interrupt(TIMER0_A0_VECTOR)))
 void timer_capture_isr(void) {
   static unsigned bitmask;
@@ -174,6 +189,34 @@ void timer_capture_isr(void) {
 
   bitmask <<= 1; // capture from LSB to MSB;
 }
+#else
+__attribute__ ((interrupt(TIMER0_A1_VECTOR)))
+void timer_capture_isr(void) {
+  static unsigned bitmask;
+  static unsigned start_ts;
+
+  volatile uint16_t resetTAIVIFG;   // just reading TAIV will reset the interrupt flag
+  resetTAIVIFG = TA0IV;
+  (void)resetTAIVIFG;
+
+  if ( !bit_indx ) {      // bit_indx == 0 ? save start time
+    start_ts=TA0CCR1;     // save TAR time at start bit
+    bitmask = 0x0001;
+  }
+
+  cnts[bit_indx] = TA0CCR1-start_ts; // save TAR time at change
+
+  if ( TA0CCTL1 & CCI ) { // if bit value is high
+    bits |= bitmask;
+  }
+
+  if ( ++bit_indx == howmany ) { // last one? wake main line
+    LPM0_EXIT;
+  }
+
+  bitmask <<= 1; // capture from LSB to MSB;
+}
+#endif
 
 #endif
 
