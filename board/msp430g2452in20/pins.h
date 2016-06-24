@@ -31,7 +31,7 @@
  * P1 port and P1.X shorthand typedefs
  */
 #ifdef __MSP430_HAS_PORT1_R__
- typedef GPIO_PORT0<
+ typedef GPIO_PORT<
          1
          ,P1IN
          ,P1OUT
@@ -68,7 +68,7 @@
  */
 #ifdef __MSP430_HAS_PORT2_R__
 
- typedef GPIO_PORT0<
+ typedef GPIO_PORT<
         2
         ,P2IN
         ,P2OUT

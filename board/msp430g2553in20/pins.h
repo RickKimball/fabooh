@@ -32,7 +32,7 @@
  */
 #ifdef __MSP430_HAS_PORT1_R__
 
- typedef GPIO_PORT<
+ typedef GPIO_PORT2<
          1
          ,P1IN
          ,P1OUT
@@ -70,7 +70,7 @@
  */
 #ifdef __MSP430_HAS_PORT2_R__
 
-typedef GPIO_PORT<
+typedef GPIO_PORT2<
         2
         ,P2IN
         ,P2OUT
