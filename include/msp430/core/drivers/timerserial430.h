@@ -36,19 +36,15 @@
 #include <ringbuffer.h>
 
 /*
- * tiny_rbuffer_t - really small ring buffer
+ * rb32_t - 32 byte ring buffer
  */
-typedef ringbuffer_t<uint8_t, 16> tiny_rbuffer_t;
+typedef ringbuffer_t<uint8_t, 32> rb32_t;
 
 /*
  * localize these variables to the compilation unit that includes it
  */
 namespace {
-  volatile unsigned int USARTTXBUF; // 1 character tx buffer, used by class and ISR
-  static uint8x2_t rx_bits;         // persistent storage for data and mask. fits in one 16 bit register
-  enum { RX_MASK=0, RX_DATA=1 };    // index into rx_bits.data[]
-
-  tiny_rbuffer_t rx_buffer;         // instance of ring buffer can be overridden by user code and ignored
+  rb32_t rx_buffer;         // instance of ring buffer can be overridden by user code and ignored
 }
 
 /*
@@ -56,6 +52,7 @@ namespace {
  */
 template <const uint32_t BAUD, const uint32_t MCLK_HZ, typename TXPIN, typename RXPIN, typename RB_T, RB_T& RB>
 struct timer_base_timer_t {
+  typedef timer_base_timer_t<BAUD,MCLK_HZ,TXPIN,RXPIN,RB_T,RB> TT;
   static const uint16_t TICKS_PER_BIT = (MCLK_HZ + (BAUD >> 1))/BAUD;
   static const uint16_t TICKS_PER_BIT_DIV2 = TICKS_PER_BIT >> 1;
 
@@ -81,11 +78,16 @@ struct timer_base_timer_t {
   static size_t rb_available() { return RB.available(); }
   static int rb_pop_front() { return RB.pop_front_nc(); }
 
+  static volatile unsigned int & TXBUF() {
+	  static volatile unsigned int USARTTXBUF;   // 1 character tx buffer, used by class and ISR
+
+	  return USARTTXBUF;
+  }
+
   /**
    * begin( baud rate ) - initialize TX/RX pins
    * Note: we assume a software pin setup like the original examples provided
    *       from TI. P1.1 is TX and P1.2 is RX.
-
    *       On an msp430 launchpad v1.5 you will have to rotate the J3
    *       RX/TX jumpers 90 degrees.
    */
@@ -107,13 +109,10 @@ struct timer_base_timer_t {
     }
 
     // allow for output only and input only UART configs
-    if ( RXPIN::pin_mask && TXPIN::pin_mask ) {
-      TXPIN::PSEL() |= (TXPIN::pin_mask | RXPIN::pin_mask);
-    }
-    else if ( TXPIN::pin_mask ) {
+    if ( TXPIN::pin_mask ) {
       TXPIN::PSEL() |= TXPIN::pin_mask;
     }
-    else if ( RXPIN::pin_mask ) {
+    if ( RXPIN::pin_mask ) {
       RXPIN::PSEL() |= RXPIN::pin_mask;
     }
 
@@ -136,17 +135,13 @@ struct timer_base_timer_t {
     flush();
     tx_timer.CTL() = 0; // stop timer
 
-    if ( RXPIN::pin_mask && TXPIN::pin_mask ) {
-      P1SEL &= ~(BIT1|BIT2);
-      P1DIR &= ~(BIT1|BIT2);
+    if ( TXPIN::pin_mask ) {
+      TXPIN::PSEL() &= ~TXPIN::pin_mask;
+      TXPIN::PDIR() &= ~TXPIN::pin_mask;
     }
-    else if ( TXPIN::pin_mask ) {
-      P1SEL &= ~BIT2;
-      P1DIR &= ~BIT2;
-    }
-    else if ( RXPIN::pin_mask ) {
-      P1SEL &= ~BIT1;
-      P1DIR &= ~BIT1;
+    if ( RXPIN::pin_mask ) {
+      RXPIN::PSEL() &= ~RXPIN::pin_mask;
+      RXPIN::PDIR() &= ~RXPIN::pin_mask;
     }
   }
 
@@ -180,7 +175,7 @@ struct timer_base_timer_t {
 
       register unsigned value = c | 0x300;  // add stop bit '11'
       value <<= 1;                          // add the start bit '0'
-      USARTTXBUF=value;                     // queue up the byte for send
+      TT::TXBUF()=value;                     // queue up the byte for send
     }
 
     return 1;
@@ -193,6 +188,9 @@ struct timer_base_timer_t {
   __attribute__((interrupt(TIMER0_A1_VECTOR)))
   static void timera_rx_isr(void)
   {
+    enum { RX_MASK=0, RX_DATA=1 };    // index into rx_bits.data[]
+    static uint8x2_t rx_bits;         // persistent storage for data and mask. fits in one 16 bit register
+
     volatile uint16_t resetTAIVIFG;   // just reading TAIV will reset the interrupt flag
     resetTAIVIFG = TA0IV;
     (void)resetTAIVIFG;
@@ -229,11 +227,11 @@ struct timer_base_timer_t {
       tx_timer.CCR() += TICKS_PER_BIT;  // setup next time to send a bit, OUT will be set then
 
       tx_timer.CCTL() |= OUTMOD2;       // reset OUT (set to 0) OUTMOD2|OUTMOD0 (0b101)
-      if ( USARTTXBUF & 0x01 ) {        // look at LSB if 1 then set OUT high
+      if ( TT::TXBUF() & 0x01 ) {        // look at LSB if 1 then set OUT high
         tx_timer.CCTL() &= ~OUTMOD2;    // set OUT (set to 1) OUTMOD0 (0b001)
       }
 
-      if (!(USARTTXBUF >>= 1)) {        // All bits transmitted ?
+      if (!(TT::TXBUF()>>= 1)) {        // All bits transmitted ?
         tx_timer.CCTL() &= ~CCIE;       // disable interrupt, indicates we are done
       }
     }
@@ -243,7 +241,7 @@ struct timer_base_timer_t {
 
 template <const uint32_t BAUD, const uint32_t MCLK_HZ,
           typename TXPIN, typename RXPIN,
-          typename RB_T=tiny_rbuffer_t, RB_T& RB=rx_buffer>
+          typename RB_T=rb32_t, RB_T& RB=rx_buffer>
 struct timer_serial_t:
   timer_base_timer_t<BAUD, MCLK_HZ, TXPIN, RXPIN, RB_T, RB>,
   print_t<timer_serial_t<BAUD, MCLK_HZ, TXPIN, RXPIN, RB_T, RB> >
