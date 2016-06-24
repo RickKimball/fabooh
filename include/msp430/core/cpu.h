@@ -36,8 +36,8 @@
 template<const uint32_t MCLK_FREQ>
 struct cpu_base_t {
     static const unsigned long frequency = MCLK_FREQ;
-    static const unsigned long msec_cycles = frequency/1000;
-    static const unsigned long usec_cycles = frequency/1000000;
+    static const unsigned long msec_cycles = MCLK_FREQ/1000;
+    static const unsigned long usec_cycles = MCLK_FREQ/1000000;
 };
 
 #if defined(__MSP430_HAS_BC2__)

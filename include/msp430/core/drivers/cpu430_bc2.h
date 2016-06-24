@@ -29,33 +29,52 @@
 #include <msp430.h>
 #include "cpu.h"
 
-template<const uint32_t FREQ>
-struct cpu430_bc2_t: cpu_base_t<F_CPU> {
-  static const unsigned long MCLK_FREQ = FREQ;
+template<const uint32_t MCLK_FREQ>
+struct cpu430_bc2_t: cpu_base_t<MCLK_FREQ> {
+  typedef cpu_base_t<MCLK_FREQ> cpu_base;
 
   static void init_clock(void) {
-    if (MCLK_FREQ == 16000000) {
+    if ( cpu_base::frequency == 16000000UL) {
 #if !defined(__MSP430G2231__)
       BCSCTL1 = CALBC1_16MHZ;
       DCOCTL = CALDCO_16MHZ;
 #else
       BCSCTL1 = 0x8F; // we provide some default values for an msp430g2231
-      DCOCTL = 0x6F;  // TODO: your msp430g2231 chip needs to be calibrated
+      DCOCTL = 0x7C;  // TODO: your msp430g2231 chip needs to be calibrated
+                      // see the goldilocks example
 #endif
     }
-    else if (MCLK_FREQ == 12000000) {
+    else if (cpu_base::frequency == 12000000UL) {
 #if !defined(__MSP430G2231__)
       BCSCTL1 = CALBC1_12MHZ;
       DCOCTL = CALDCO_12MHZ;
+#else
+      BCSCTL1 = 0x8E; // we provide some default values for an msp430g2231
+      DCOCTL = 0x82;  // TODO: your msp430g2231 chip needs to be calibrated
 #endif
     }
-    else if (MCLK_FREQ == 8000000) {
+    else if (cpu_base::frequency == 8000000UL) {
 #if !defined(__MSP430G2231__)
       BCSCTL1 = CALBC1_8MHZ;
       DCOCTL = CALDCO_8MHZ;
+#else
+      BCSCTL1 = 0x8D; // we provide some default values for an msp430g2231
+      DCOCTL = 0x74;  // TODO: your msp430g2231 chip needs to be calibrated
 #endif
     }
-    else if (MCLK_FREQ == 1000000) {
+    else if (cpu_base::frequency == 6400000UL) {
+#if defined(__MSP430G2231__)
+      BCSCTL1 = 0x8C; // we provide some default values for an msp430g2231
+      DCOCTL = 0x95;  // TODO: your msp430g2231 chip needs to be calibrated
+#endif
+    }
+    else if (cpu_base::frequency == 4000000UL) {
+#if defined(__MSP430G2231__)
+      BCSCTL1 = 0x8B; // we provide some default values for an msp430g2231
+      DCOCTL = 0x4D;  // TODO: your msp430g2231 chip needs to be calibrated
+#endif
+    }
+    else if (cpu_base::frequency == 1000000UL) {
       BCSCTL1 = CALBC1_1MHZ;
       DCOCTL = CALDCO_1MHZ;
     }
@@ -70,6 +89,6 @@ struct cpu430_bc2_t: cpu_base_t<F_CPU> {
   }
 };
 
-typedef cpu430_bc2_t<F_CPU> CPU;
+typedef cpu430_bc2_t<F_CPU> CPU; // F_CPU from build environment
 
 #endif /* CPU430_BC2_H */
