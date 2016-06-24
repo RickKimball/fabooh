@@ -27,21 +27,6 @@
 #ifndef GPIO_H_
 #define GPIO_H_
 
-#ifdef __GNUC__
-#define ALWAYS_INLINE inline __attribute__((always_inline))
-#define NEVER_INLINE __attribute__((noinline))
-#ifndef __always_inline
-#define __always_inline __attribute__((always_inline))
-#endif
-#ifndef __noinline
-#define __noinline __attribute__((noinline))
-#endif
-#else
-#define ALWAYS_INLINE inline
-#define NEVER_INLINE
-#warning This code takes advantage of features only found in msp430-gcc!!!
-#endif
-
 #include <logic.h>
 
 #define GPIO_VERSION 0x0100 /* 1.0 */
@@ -84,7 +69,7 @@ template <
   ,u8_SFR psel
   ,u8_SFR pren
 >
-struct GPIO_PORT_BASE0 {
+struct GPIO_PORT_BASE {
     static const int _portno = portno;
 
     static ALWAYS_INLINE u8_SFR POUT() { return pout; }
@@ -200,13 +185,13 @@ template <
   ,u8_SFR pren
 >
 struct GPIO_PORT_BASE2 :
-  GPIO_PORT_BASE0<portno,pin,pout,pdir,psel,pren>
+  GPIO_PORT_BASE<portno,pin,pout,pdir,psel,pren>
 {
   static u8_SFR PSEL2() { return psel2; }
 };
 
 /*
-* GPIO_PORT0<> - port template for interrupt capable ports
+* GPIO_PORT<> - port template for interrupt capable ports
 *
 */
 
@@ -221,8 +206,8 @@ template <
   ,u8_SFR psel
   ,u8_SFR pren
 >
-struct GPIO_PORT0 :
-GPIO_PORT_BASE0<portno,pin,pout,pdir,psel,pren>
+struct GPIO_PORT :
+GPIO_PORT_BASE<portno,pin,pout,pdir,psel,pren>
 {
   static volatile uint8_t _fakepsel;
 
@@ -250,7 +235,7 @@ template <
   ,u8_SFR psel2
   ,u8_SFR pren
 >
-struct GPIO_PORT :
+struct GPIO_PORT2 :
   GPIO_PORT_BASE2<portno, pin,pout,pdir,psel,psel2,pren>
 {
   static u8_SFR PIFG()  { return pifg; }
