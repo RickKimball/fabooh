@@ -3,6 +3,7 @@
 #
 
 TOOLCHAIN = arm-none-eabi-
+FIXMATH_FLAGS = -DFIXMATH_NO_CACHE -DFIXMATH_NO_ROUNDING
 F_CPU ?= 48000000
 CORE = cortex-m0
 CORE_FLAGS = -mcpu=$(CORE) -mthumb

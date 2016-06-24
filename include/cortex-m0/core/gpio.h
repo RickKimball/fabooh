@@ -368,7 +368,6 @@ struct DummyGPIO {
     static uint8_t PINMASK() { return 0; }
 
     static void set_mode(const uint8_t, pin_mode) {}
-    static const int _portno = DUMMY_PORT;
   } port;
 
   static const uint8_t pin_mask=0;
