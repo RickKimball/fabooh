@@ -28,6 +28,9 @@
 #ifndef SPI_H_
 #define SPI_H_
 
+#include <msp430.h>
+
+
 /*
  * spi_mode_e -
  */
@@ -98,5 +101,10 @@ struct spi_base_t {
 #endif
 
 };
+
+#include <drivers/spi_usi.h>
+#include <drivers/spi_usci.h>
+#include <drivers/spi_eusci.h>
+#include <drivers/spi_bitbang.h>
 
 #endif /* SPI_H_ */
