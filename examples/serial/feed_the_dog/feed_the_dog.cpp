@@ -25,12 +25,14 @@ inline void setup(void)
   Serial.begin();
   Serial << "\r\nRESET!\n";
 
+#ifdef __MSP430_HAS_AD10__
   /* ADC on P1.5 */
   P1_5::PSEL();
   ADC10CTL0 &= ~ENC;
   ADC10CTL1 = INCH_5 | ADC10DIV_3 ;          // Select A5, ADC10CLK/4
   ADC10CTL0 = SREF_0 | ADC10SHT_3 | ADC10ON; // Vr+ = Vcc / Vr- = Vss, 64 x ADC10CLKs, ADC10 On
   ADC10AE0 |= BIT5;                          // Enable ADC input P1.5
+#endif
 
   /* Timer0 A0*/
   TA0CCR0 = (CPU::frequency/SYSTICK)/8;  // Count overflow frequency ~10ms
@@ -44,6 +46,7 @@ void loop()
 {
   WDTCTL = WDTPW|WDTCNTCL;               // feed the wdt, ~32ms timeout from SMCLK
 
+#ifdef __MSP430_HAS_ADC10__
   if (count > 99) {                      // ~1 Second
     count = 0;
     __delay_cycles(125);                 // Let the pins settle
@@ -55,6 +58,9 @@ void loop()
 
     Serial << sample << "    \r";
   }
+#else
+  Serial << "ADC10 not supported on this chip\r\n";
+#endif
   LPM0;
 }
 
