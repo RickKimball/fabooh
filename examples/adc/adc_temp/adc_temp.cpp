@@ -1,5 +1,5 @@
 /*
- * adc_temp - read temp from ADC10 and convert to Farenheit and Celsius
+ * adc_temp - read temperature from ADC10 and convert to Fahrenheit and Celsius
  *            This code uses libfixmath to convert adc samples from millivolts
  *            to F and C. It also provides some reference code that uses
  *            straight integer math to accomplish the same thing.
@@ -18,10 +18,10 @@
 typedef serial_default_t<9600,CPU::frequency,TX_PIN,NO_PIN> serial_t;
 
 // conditional compiles let you compare sizes and code generated
-#define USE_FIX16
-#undef USE_INTEGER_MATH
+#undef USE_FIX16
+#define USE_INTEGER_MATH
 
-#ifdef __MSP430G2553__
+#if defined(__MSP430G2553__) || defined(__MSP430G2231__) || defined(__MSP430G2452__)
 void setup() {
   serial_t Serial;
 
@@ -32,17 +32,18 @@ void setup() {
 
   Serial.begin(9600);
 
-  __enable_interrupt();
 
   unsigned sample;
 
   while(1) {
     // enable ADC sample, sleep till complete
     ADC10CTL0 |= (ENC |ADC10SC);
-    LPM3;
+    __bis_SR_register(LPM3_bits | GIE);
     __nop(); // make debugger happy see [1]
 
     sample = ADC10MEM;
+
+    //Serial << "RAW=" << sample << " ";
 
     // output F and C temps
   #ifdef USE_FIX16
@@ -55,6 +56,7 @@ void setup() {
     // convert sample to F = C*9/5 + 32
     Fix16 f = (c * Fix16(9.0/5.0)) + Fix16(32);
     Serial << _FIX16(f + 0.0005f, 3) << "F" << endl;
+
   #endif
 
   #ifdef USE_INTEGER_MATH
@@ -63,7 +65,7 @@ void setup() {
     Serial << conversion << "C ";
 
     conversion = ((48724L * sample ) - 30634388L) >> 16;
-    Serial << conversion << "F (43oh)" << endl;
+    Serial << conversion << "F" << endl;
   #endif
 
     delay(5000);
