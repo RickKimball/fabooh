@@ -11,8 +11,12 @@
 
 namespace {
   const uint32_t BAUD_RATE = 9600;
+#if defined(__MSP430G2231__) || defined(__MSP430G2452__)
+  timer_serial_t<BAUD_RATE, CPU::frequency, TX_PIN, RX_PIN> Serial; // TX=varies, RX=varies
+#else
   serial_default_t<BAUD_RATE, CPU::frequency, TX_PIN, RX_PIN> Serial; // TX=varies, RX=varies
-  const char *prompt = "\r\ntype here: ";
+#endif
+  const char *prompt = "\r\ntype here:\r";
 }
 
 void setup() {
