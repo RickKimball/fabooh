@@ -21,7 +21,13 @@
 #include <LPC11xx.h>
 #include <core_cm0.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <libfixmath/fix16.hpp>
+#ifdef __cplusplus
+}
+#endif
 
 #include "cpu.h"
 #include "gpio.h"

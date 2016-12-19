@@ -2,7 +2,7 @@
  * crt0.c - handle chip reset
  */
 
-#include <fabooh.h>
+#include "LPC11xx.h"
 
 #ifdef __cplusplus
  extern "C" {
@@ -12,8 +12,6 @@
 #define WEAK_SYSISR __attribute__((weak))
 
 extern int __stack;
-
-extern void _init(void);
 
 void Reset_Handler(void) __attribute__((section(".init0"),naked));
 void NMI_Handler(void) WEAK_SYSISR;
@@ -63,7 +61,7 @@ int main( void );
 typedef void (* const __vector)(void);
 
 __attribute__ ((section(".vectors")))
-extern __vector __isr_vectors[16 + 32] = {
+__vector __isr_vectors[16 + 32] = {
     /******  Cortex-M0 Processor Exceptions Numbers ***************************************************/
     (__vector ) &__stack    // -16 set the top of stack
     , Reset_Handler         // -15 reset handler
@@ -126,12 +124,6 @@ void Reset_Handler(void) {
     extern int __data_end;
     extern int __bss_start;
     extern int __bss_end;
-    extern int __init_array_start;
-    extern int __init_array_end;
-#if 0
-    extern int __fini_array_start;
-    extern int __fini_array_end;
-#endif
 
     int *s, *d, *e;
 
@@ -151,14 +143,9 @@ void Reset_Handler(void) {
         *d++ = *s++;
     }
 
-    // call the c++ global objects constructors
-    s = &__init_array_start;
-    e = &__init_array_end;
-    while (s != e) {
-        (*((void (**)()) s++))();
-    }
+    extern void __libc_init_array(void);
 
-	_init();
+    __libc_init_array();
 
     // call main
     (void)main();
