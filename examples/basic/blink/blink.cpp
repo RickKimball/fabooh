@@ -8,19 +8,16 @@
 LED_BUILTIN_ LED_BUILTIN;
 
 void setup(void) {
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH); // off
+  LED_BUILTIN.setmode_output();
+  LED_BUILTIN.high();
 }
 
 void loop(void) {
   const uint32_t freq = 2;
-  const uint32_t msec_delay0 = 1000 / freq / 10 ;
-  const uint32_t msec_delay1 = msec_delay0*9;
+  const uint32_t msec_delay0 = 1000 / freq / 2 ;
   
   while (1) {
-    digitalWrite(LED_BUILTIN, LOW);  // on
+    LED_BUILTIN.toggle();
     delay(msec_delay0);
-    digitalWrite(LED_BUILTIN, HIGH); // off
-    delay(msec_delay1);
   }
 }

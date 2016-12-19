@@ -203,16 +203,32 @@ struct GPIO_PIN : GPIO_TypeDef {
     *crx_reg = temp;
   }
 
+  void clear(void) {
+    low();
+  }
+
   void high(void) {
-    GPIOx().BSRR = 1 << pin_no;
+    GPIOx().BSRR = pin_mask();
   }
 
   void low(void) {
-    GPIOx().BRR = 1 << pin_no;
+    GPIOx().BRR = pin_mask();
+  }
+
+  void reset(void) {
+    low();
+  }
+
+  void set(void) {
+    high();
+  }
+
+  void toggle(void) {
+    GPIOx().ODR ^= pin_mask();
   }
 
   int value(void) {
-    return (GPIOx().IDR & (1 << pin_no)) ? HIGH : LOW;
+    return (GPIOx().IDR & pin_mask()) ? HIGH : LOW;
   }
 
   void operator=(const int value) {
