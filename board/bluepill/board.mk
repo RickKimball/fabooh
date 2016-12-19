@@ -18,7 +18,7 @@ AS_DEFS =
 LD_SCRIPT = $(FBD)$(BOARDDIR)/stm32f103c8.ld
 LD_FLAGS = -T$(LD_SCRIPT) -g -Wl,-Map=$(OUT_DIR_F)$(PROJECT).map,--cref,--no-warn-mismatch
 LD_FLAGS += -Wl,--gc-sections -specs=nosys.specs -specs=nano.specs
-OPTIMIZATION += -ffunction-sections -fdata-sections -Os -mslow-flash-data
+OPTIMIZATION_FLAGS = -mslow-flash-data
 LD_FLAGS += -nostartfiles
 LD=$(CXX)
 
