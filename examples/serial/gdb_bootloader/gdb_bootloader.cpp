@@ -128,7 +128,7 @@ void gdb_bootloader() {
     register unsigned work_reg = USER_RESET_VECTOR; // check for valid user vector in flash hiding spot
 
     PUSH2::disable_pupd_resistor();
-    RED_LED::setmode_input();
+    PUSH2::setmode_input();
     // check to see if there is code at user reset vector, if not, then go into gdb server mode
 
     if ( *(uint16_t *)work_reg != 0xffff) {
