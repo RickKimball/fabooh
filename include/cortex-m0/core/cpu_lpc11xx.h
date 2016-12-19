@@ -214,9 +214,10 @@ struct cpu_lpc11xx_t
   }
 
   static void delay_msec(const uint32_t msec) {
-    volatile uint32_t t = tickcount + msec;
+    volatile uint32_t t = tickcount;
 
-    while (tickcount < t) ;
+	do {
+	} while ( (tickcount-t) < msec) ;
   }
 
 };

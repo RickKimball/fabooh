@@ -32,12 +32,6 @@ OUTPUT_ARCH(arm);
 /* Handler mode (core exceptions / interrupts) can use only main stack */
 /* Thread mode can use main stack (default) or process stack - selected in CONTROL special register */
 
-__main_stack_size = 2048;
-__process_stack_size = 0;
-
-PROVIDE(__main_stack_size = __main_stack_size);
-PROVIDE(__process_stack_size = __process_stack_size);
-
 /*
 +=============================================================================+
 | available memories definitions
@@ -188,38 +182,10 @@ SECTIONS
 		__stack_bottom = .;
 		PROVIDE(__stack_bottom = __stack_bottom);
 
-		. = ALIGN(8);
-		__main_stack_start = .;
-		PROVIDE(__main_stack_start = __main_stack_start);
-
-		. += __main_stack_size;
-
-		. = ALIGN(8);
-		__main_stack_end = .;
-		PROVIDE(__main_stack_end = __main_stack_end);
-
-		. = ALIGN(8);
-		__process_stack_start = .;
-		PROVIDE(__process_stack_start = __process_stack_start);
-
-		. += __process_stack_size;
-
-		. = ALIGN(8);
-		__process_stack_end = .;
-		PROVIDE(__process_stack_end = __process_stack_end);
-
-		. = ALIGN(8);
-		__stack = .;
-		PROVIDE(__stack = __stack);
 	} > ram AT > ram
 
-	. = ALIGN(4);
-	__heap_start = .;
-	PROVIDE(__heap_start = __heap_start);
-
-	. = ALIGN(4);
-	__heap_end = __ram_end;
-	PROVIDE(__heap_end = __heap_end);
+	/*PROVIDE(__main_stack_end = ORIGIN(ram) + LENGTH(ram) ); */
+	PROVIDE(__stack = ORIGIN(ram) + LENGTH(ram) );
 
 	.stab 				0 (NOLOAD) : { *(.stab) }
 	.stabstr 			0 (NOLOAD) : { *(.stabstr) }
@@ -258,8 +224,8 @@ PROVIDE(__text_size = __text_end - __text_start);
 PROVIDE(__exidx_size = __exidx_end - __exidx_start);
 PROVIDE(__data_size = __data_end - __data_start);
 PROVIDE(__bss_size = __bss_end - __bss_start);
-PROVIDE(__stack_size = __stack - __stack_bottom);
-PROVIDE(__heap_size = __heap_end - __heap_start);
+PROVIDE(__stack_size =  1024);
+PROVIDE(__heap_size = 0 );
 
 /******************************************************************************
 * END OF FILE

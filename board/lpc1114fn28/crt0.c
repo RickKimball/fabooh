@@ -13,6 +13,8 @@
 
 extern int __stack;
 
+extern void _init(void);
+
 void Reset_Handler(void) __attribute__((section(".init0"),naked));
 void NMI_Handler(void) WEAK_SYSISR;
 void HardFault_Handler(void) WEAK_SYSISR;
@@ -126,11 +128,14 @@ void Reset_Handler(void) {
     extern int __bss_end;
     extern int __init_array_start;
     extern int __init_array_end;
+#if 0
     extern int __fini_array_start;
     extern int __fini_array_end;
+#endif
 
     int *s, *d, *e;
 
+    asm("mov sp,%0" :: "r" (&__stack));
     // clear .bss section
     d = &__bss_start;
     e = &__bss_end;
@@ -153,15 +158,19 @@ void Reset_Handler(void) {
         (*((void (**)()) s++))();
     }
 
+	_init();
+
     // call main
     (void)main();
 
+#if 0
     // call the c++ global objects constructors
     s = &__fini_array_start;
     e = &__fini_array_end;
     while (s != e) {
         (*((void (**)()) s++))();
     }
+#endif
 
     // trap exit
     while(1);

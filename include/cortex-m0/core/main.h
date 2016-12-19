@@ -22,7 +22,7 @@ extern "C" {
 int main(void)
 {
     CPU::init_clock();
-    CPU::enable_clkout();
+    //CPU::enable_clkout();
     SysTick_Config(F_CPU/1000);
 
     setup();
