@@ -111,7 +111,7 @@ OPTIMIZATION ?= -Os
 CXX_WARNINGS = -Wall
 C_WARNINGS = -Wall -Wstrict-prototypes
 
-# C++ language standard ("c++98", "gnu++98" - default, "c++0x", "gnu++0x")
+# C++ language standard ("c++98", "gnu++98" - default, "c++0x", "gnu++0x", "gnu++11", "gnu++14")
 CXX_STD ?= gnu++98
 
 # C language standard ("c89" / "iso9899:1990", "iso9899:199409",
