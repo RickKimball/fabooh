@@ -42,6 +42,7 @@ FIXMATH_FLAGS ?= -DFIXMATH_NO_CACHE -DFIXMATH_NO_64BIT -DFIXMATH_NO_ROUNDING
 FABOOH_FLAGS = -DFABOOH
 FABOOH_FLAGS += $(FIXMATH_FLAGS)
 FABOOH_FLAGS += -fwrapv -fomit-frame-pointer
+FABOOH_FLAGS += -ffunction-sections -fdata-sections
 
 #=============================================================================#
 # board specific options, cpu and toolchain selection
