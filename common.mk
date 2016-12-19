@@ -28,7 +28,12 @@
 FBD := $(dir $(lastword $(MAKEFILE_LIST)))
 
 # which board will be used as default
-BOARD ?= msp430g2553in20
+#BOARD ?= msp430g2553in20
+#BOARD ?= msp430g2452in20
+#BOARD ?= msp430g2231in14
+#BOARD ?= msp430fr5969
+#BOARD ?= lpc1114fn28
+BOARD ?= bluepill
 BOARDDIR = board/$(BOARD)
 BOARDS = $(notdir $(wildcard $(FBD)board/*))
 _3RD_PARTY_DIR = include/3rdparty
@@ -88,15 +93,16 @@ C_EXT = c
 C_SRCS = $(wildcard $(patsubst %, %/*.$(C_EXT), . $(SRCS_DIRS)))
 
 # extension of ASM files
-AS_EXT = S
+AS_EXT = s
 
 # wildcard for ASM source files (all files with AS_EXT extension found in
 # current folder and SRCS_DIRS folders will be compiled and linked)
 AS_SRCS = $(wildcard $(patsubst %, %/*.$(AS_EXT), . $(SRCS_DIRS)))
 
 # optimization flags ("-O0" - no optimization, "-O1" - optimize, "-O2" -
-# optimize even more, "-Os" - optimize for size or "-O3" - optimize yet more) 
-OPTIMIZATION = -Os
+# optimize even more, "-Os" - optimize for size or "-O3" - optimize yet more 
+# optimize for debug, "-Og" - optimize for debug) 
+OPTIMIZATION ?= -Os
 
 # warning options 
 #CXX_WARNINGS = -Wall -Wextra
@@ -106,7 +112,7 @@ CXX_WARNINGS = -Wall
 C_WARNINGS = -Wall -Wstrict-prototypes
 
 # C++ language standard ("c++98", "gnu++98" - default, "c++0x", "gnu++0x")
-CXX_STD = gnu++98
+CXX_STD ?= gnu++98
 
 # C language standard ("c89" / "iso9899:1990", "iso9899:199409",
 # "c99" / "iso9899:1999", "gnu89" - default, "gnu99")
@@ -136,13 +142,13 @@ endif
 LISTING_FLAGS = -Wa,-ahlms=$(OUT_DIR_F)$(notdir $(<:.c=.lst))
 
 # flags for C++ compiler
-CXX_FLAGS = -std=$(CXX_STD) -g -fno-rtti -fno-exceptions -fverbose-asm
+CXX_FLAGS = -std=$(CXX_STD) -ggdb -fno-rtti -fno-exceptions -fverbose-asm
 
 # flags for C compiler
 C_FLAGS = -std=$(C_STD) -g -fverbose-asm
 
 # flags for assembler
-AS_FLAGS =
+AS_FLAGS = -x assembler-with-cpp
 
 
 #=============================================================================#
@@ -168,7 +174,7 @@ DMP = $(OUT_DIR_F)$(PROJECT).dmp
 CXX_FLAGS_F = $(CORE_FLAGS) $(OPTIMIZATION) $(CXX_WARNINGS) $(FABOOH_FLAGS) $(CXX_FLAGS) $(CXX_DEFS) -MD -MP -MF $(OUT_DIR_F)$(@F:.o=.d) $(INC_DIRS_F)
 C_FLAGS_F = $(CORE_FLAGS) $(OPTIMIZATION) $(C_WARNINGS) $(FABOOH_FLAGS) $(C_FLAGS) $(C_DEFS) -MD -MP -MF $(OUT_DIR_F)$(@F:.o=.d) $(INC_DIRS_F)
 AS_FLAGS_F = $(CORE_FLAGS) $(FABOOH_FLAGS) $(AS_FLAGS) $(AS_DEFS) -MD -MP -MF $(OUT_DIR_F)$(@F:.o=.d) $(INC_DIRS_F)
-LD_FLAGS_F = $(CORE_FLAGS) $(FABOOH_FLAGS) $(LD_FLAGS) $(LIB_DIRS_F)
+LD_FLAGS_F = $(CORE_FLAGS) $(LD_FLAGS) $(LIB_DIRS_F)
 
 #contents of output directory
 GENERATED = $(wildcard $(patsubst %, $(OUT_DIR_F)*.%, bin d dmp elf hex lss lst map o))
@@ -199,7 +205,7 @@ $(ELF) : $(OBJS)
 #-----------------------------------------------------------------------------#
 
 $(OUT_DIR_F)%.o : %.$(CXX_EXT)
-	@echo 'Compiling file: $<'
+	@echo 'Compiling C++ file: $<'
 	$(CXX) -c $(CXX_FLAGS_F) $< -o $@
 	@echo ' '
 
@@ -209,7 +215,7 @@ $(OUT_DIR_F)%.o : %.$(CXX_EXT)
 
 $(OUT_DIR_F)%.o : %.$(C_EXT)
 	@echo 'Compiling C file: $<'
-	$(CXX) -c $(CXX_FLAGS_F) $< -o $@
+	$(CC) -c $(C_FLAGS_F) $< -o $@
 	@echo ' '
 
 #-----------------------------------------------------------------------------#
@@ -296,10 +302,10 @@ else
 endif
 ifneq ($(strip $(GENERATED)), )
 	$(RM) $(GENERATED)
-	$(RM) -r $(OUT_DIR_F)
 else
 	@echo 'Nothing to remove...'
 endif
+	@$(RM) -r $(OUT_DIR_F)
 
 #=============================================================================#
 # global exports
