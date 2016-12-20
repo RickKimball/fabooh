@@ -7,7 +7,6 @@ fabooh is an optimized C++ template based peripheral framework.  The current imp
 ```
 #include <fabooh.h>
 #include <main.h>
-#include <serial.h>
 
 serial_default_t<9600, CPU::frequency, TX_PIN, NO_PIN> Serial; // xmit only serial
 
