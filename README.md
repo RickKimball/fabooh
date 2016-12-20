@@ -7,6 +7,7 @@ fabooh is an optimized C++ template based peripheral framework.  The current imp
 ```
 #include <fabooh.h>
 #include <main.h>
+#include <serial.h>
 
 serial_default_t<9600, CPU::frequency, TX_PIN, NO_PIN> Serial; // xmit only serial
 
@@ -18,6 +19,20 @@ void loop() {
   Serial.print("Hello world!\n");
   while(1);
 }
+
+**sizes**
+arm-none-eabi-size bluepill_release/hello_world.elf
+   text	   data	    bss	    dec	    hex	filename
+    892	      4	      4	    900	    384	bluepill_release/hello_world.elf
+
+arm-none-eabi-size lpc1114fn28_release/hello_world.elf
+   text	   data	    bss	    dec	    hex	filename
+    812	      0	      8	    820	    334	lpc1114fn28_release/hello_world.elf
+
+msp430-size msp430g2553in20_release/hello_world.elf
+   text	   data	    bss	    dec	    hex	filename
+    146	      0	      0	    146	     92	msp430g2553in20_release/hello_world.elf
+
 ```
 
 # etymology
@@ -29,4 +44,3 @@ fabooh – [\’fab-‘ü\ fab](http://fabooh.com/wp-content/uploads/2013/04/fab
 
 # blog 
 [fabooh blog](http://fabooh.com)
-
