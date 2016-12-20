@@ -37,7 +37,7 @@ msp430-size msp430g2553in20_release/hello_world.elf
 
 # etymology
 
-fabooh – [\’fab-‘ü\](http://fabooh.com/wp-content/uploads/2013/04/fabooh.mp3?_=1)
+fabooh – [\’fab-‘ü](http://fabooh.com/wp-content/uploads/2013/04/fabooh.mp3?_=1)
 *fab* (construct, manufacture; specifically : to construct from diverse and usually standardized parts)
 *+*
 *ooh* (to exclaim in amazement)
