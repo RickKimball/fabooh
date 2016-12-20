@@ -143,21 +143,12 @@ void Reset_Handler(void) {
         *d++ = *s++;
     }
 
+    // invoke global C++ ctors after calling _init()
     extern void __libc_init_array(void);
-
     __libc_init_array();
 
     // call main
     (void)main();
-
-#if 0
-    // call the c++ global objects constructors
-    s = &__fini_array_start;
-    e = &__fini_array_end;
-    while (s != e) {
-        (*((void (**)()) s++))();
-    }
-#endif
 
     // trap exit
     while(1);
