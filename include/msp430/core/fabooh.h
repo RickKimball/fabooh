@@ -56,8 +56,8 @@
 #include "cpu.h"
 #include "gpio.h"
 #include "print.h"
-
 #include <pins.h> // driven by the selected board -I boards/${BOARD}
+#include "serial.h"
 
 ALWAYS_INLINE
 void setup(void); // run once at power on
