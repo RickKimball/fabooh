@@ -4,7 +4,7 @@ fabooh is an optimized C++ template based peripheral framework.  The current imp
 
 # hello world (fabooh style)
 
-```
+```C++
 #include <fabooh.h>
 #include <main.h>
 
@@ -18,8 +18,10 @@ void loop() {
   Serial.print("Hello world!\n");
   while(1);
 }
+```
 
-**sizes**
+```
+**compiled binary sizes for selected targets:**
 arm-none-eabi-size bluepill_release/hello_world.elf
    text	   data	    bss	    dec	    hex	filename
     892	      4	      4	    900	    384	bluepill_release/hello_world.elf
@@ -31,12 +33,11 @@ arm-none-eabi-size lpc1114fn28_release/hello_world.elf
 msp430-size msp430g2553in20_release/hello_world.elf
    text	   data	    bss	    dec	    hex	filename
     146	      0	      0	    146	     92	msp430g2553in20_release/hello_world.elf
-
 ```
 
 # etymology
 
-fabooh – [\’fab-‘ü\ fab](http://fabooh.com/wp-content/uploads/2013/04/fabooh.mp3?_=1)
+fabooh – [\’fab-‘ü](http://fabooh.com/wp-content/uploads/2013/04/fabooh.mp3?_=1)
 *fab* (construct, manufacture; specifically : to construct from diverse and usually standardized parts)
 *+*
 *ooh* (to exclaim in amazement)
