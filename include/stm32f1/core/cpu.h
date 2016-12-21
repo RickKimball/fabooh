@@ -1,3 +1,7 @@
+/*
+ * cpu.h - abstract CPU clock initialization, time and sleeping
+ */
+
 #ifndef CPU_H_
 #define CPU_H_
 #include <stm32f1xx.h>

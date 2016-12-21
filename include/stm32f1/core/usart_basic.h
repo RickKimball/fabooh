@@ -1,5 +1,9 @@
 /*
- * blink.cpp - simple fabooh blink
+ * usart_basic.h - Hardware USART Serial templates for stm32f1
+ *
+ * Created: 12-18-2016
+ * Author: rick@kimballsoftware.com
+ * Vesion: 1.0.1
  */
 
 #ifndef USART_BASIC_H_
@@ -78,7 +82,6 @@ struct usart_basic_t {
    * read - blocking read function
    */
   int read(void) {
-
     while(!(USARTx()->SR & USART_SR_RXNE));
 
     return USARTx()->DR;
@@ -90,7 +93,6 @@ struct usart_basic_t {
    * This function called by the print_t class
    */
   int write_impl(uint8_t c) {
-
     while(!(USARTx()->SR & USART_SR_TXE));
     USARTx()->DR = c;
 

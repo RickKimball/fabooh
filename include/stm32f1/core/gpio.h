@@ -1,5 +1,5 @@
 /*
- * gpio.h
+ * gpio.h - C++ template based GPIO port and pin methods
  *
  *  Created on: Apr 16, 2013
  *      Author: kimballr

@@ -1,5 +1,5 @@
 /*
- * main.h
+ * main.h - fabooh default main
  *
  *  Created on: Apr 16, 2013
  *      Author: kimballr
