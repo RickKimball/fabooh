@@ -56,6 +56,9 @@
  * @param  None
  * @retval : None
 */
+
+  .word _sidata, _sdata, _edata, _sbss, _ebss
+
   .section .text.Reset_Handler,"ax",%progbits
   .weak Reset_Handler
   .type Reset_Handler, %function
@@ -94,7 +97,10 @@ bss_init:
   /* Call the application's entry point.*/
   bl    main
 
-  /* in the unlikely case we do exit main, fall through to Default_Handler
+  /* in the unlikely case we do exit main, fall through to Default_Handler */
+Default_Handler:
+  b Default_Handler
+
   .size Reset_Handler, .-Reset_Handler
 
 /**
@@ -108,11 +114,6 @@ bss_init:
  * @param  None
  * @retval : None
  */
-  .section .text.Default_Handler,"ax",%progbit
-Default_Handler:
-fault_loop:
-  b fault_loop
-  .size Default_Handler, .-Default_Handler
 
 /*---------------------------------------------------------
  * vector defines
