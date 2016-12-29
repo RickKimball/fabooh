@@ -118,19 +118,22 @@ enum pin_cnf_mode_out_e {
 };
 
 /*
- *  GPIO_PIN -
+ *  GPIO_PIN - GPIO access functions
+ *
+ *  gpio_port_no = 1=PORTA,2=PORTB,3=PORTC ...
+ *  pin_no       = 0..15
  */
 
 template<const uint32_t gpio_port_no, const uint32_t pin_no>
 struct GPIO_PIN : GPIO_TypeDef {
 
-  static const uint32_t port_pin(void) { return (gpio_port_no << 16) | pin_no; }
+  static uint32_t port_pin(void) { return (gpio_port_no << 16) | pin_no; }
 
-  static const uint32_t port(void) { return gpio_port_no; }
+  static uint32_t port(void) { return gpio_port_no; }
 
-  static const uint32_t pin(void) { return pin_no; }
+  static uint32_t pin(void) { return pin_no; }
 
-  static const uint32_t pin_mask(void) { return 1 << pin_no; }
+  static uint32_t pin_mask(void) { return 1 << pin_no; }
 
   static GPIO_TypeDef & GPIOx(void) {
     switch(gpio_port_no) {
@@ -174,7 +177,7 @@ struct GPIO_PIN : GPIO_TypeDef {
   }
 
   void setmode_input(pin_cnf_mode_in_e cnf_mode = PIN_INPUT_FLOATING) {
-    const uint32_t offset = (pin_no < 8) ? (pin_no) << 2 : (pin_no - 8) << 2; // CRx+CNF is 4 bits
+    const uint32_t offset = (pin_no < 8) ? pin_no * 4 : (pin_no - 8) * 4; // CRx+CNF is 4 bits
     volatile uint32_t * const crx_reg = (pin_no < 8) ? &GPIOx().CRL : &GPIOx().CRH;
 
     uint32_t temp = *crx_reg;
@@ -195,7 +198,7 @@ struct GPIO_PIN : GPIO_TypeDef {
    * modifies both CNF and CRX (CRL/CRH) register settings
    */
   void setmode_output(pin_crx_speed_e speed=PIN_SPEED_50MHZ, pin_cnf_mode_out_e cnf_mode=PIN_PUSHPULL_OUT ) {
-    const uint32_t offset = (pin_no < 8 ) ? (pin_no) << 2 : (pin_no - 8) << 2; // CRx+CNF is 4 bits
+    const uint32_t offset = (pin_no < 8 ) ? pin_no * 4: (pin_no - 8) * 4; // CRx+CNF is 4 bits
     volatile uint32_t * const crx_reg = (pin_no < 8) ? &GPIOx().CRL : &GPIOx().CRH;
 
     uint32_t temp = *crx_reg;
@@ -207,12 +210,18 @@ struct GPIO_PIN : GPIO_TypeDef {
     low();
   }
 
+  /*
+   * high - set pin high (VCC)
+   */
   void high(void) {
     GPIOx().BSRR = pin_mask();
   }
 
+  /*
+   * low - set pin low (GND)
+   */
   void low(void) {
-    GPIOx().BRR = pin_mask();
+    GPIOx().BSRR = pin_mask() << 16;
   }
 
   void reset(void) {
@@ -242,22 +251,44 @@ struct GPIO_PIN : GPIO_TypeDef {
 };
 
 /*
- * GPIO_PIN_LED - LED specialized GPIO_PIN
+ * GPIO_PIN_LED - GPIO_PIN specialized for LED usage
  */
 
-template<const uint32_t gpio_port_no, const uint32_t pin_no, const bool active_high=true >
+template<const uint32_t gpio_port_no, const uint32_t pin_no, const bool is_active_high=true >
 struct GPIO_PIN_LED :
     GPIO_PIN<gpio_port_no, pin_no > {
       typedef GPIO_PIN<gpio_port_no, pin_no> BASE;
 
       void off(void) {
-        active_high ? this->low() : this->high();
+        is_active_high ? this->low() : this->high();
       }
 
       void on(void) {
-        active_high ? this->high() : this->low();
+        is_active_high ? this->high() : this->low();
       }
+
+      void operator=(const int value) {
+        if ( is_active_high )
+          BASE() = value;
+        else
+          BASE() = !value;
+      }
+
+      void operator=(pin_value_e value) {
+        if (0) (void)0;
+        else if(value==LOW)
+          BASE() = 0;
+        else if(value==HIGH)
+          BASE() = 1;
+        else if(value==ON)
+          on();
+        else if(value==OFF)
+          off();
+      }
+
 };
+
+//--- Arduino API concessions ---
 
 #define pinMode(p,m) ((p).pin_mode((m)))
 #define digitalWrite(p,v) ((v) ? (p).high() : (p).low())
