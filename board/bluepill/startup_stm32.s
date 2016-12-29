@@ -9,7 +9,7 @@
   *                - Set the initial SP
   *                - Set the initial PC == Reset_Handler,
   *                - Set the vector table entries with the exceptions ISR address
-  *                - Configure the clock system   
+  *                - Configure the clock system
   *                - Branches to main in the C library (which eventually
   *                  calls main()).
   *            After Reset the Cortex-M3 processor is in Thread mode,
@@ -45,108 +45,91 @@
 
   .syntax unified
   .cpu cortex-m3
-  .fpu softvfp
   .thumb
 
-.global g_pfnVectors
-.global Default_Handler
-
-/* start address for the initialization values of the .data section.
-defined in linker script */
-.word _sidata
-/* start address for the .data section. defined in linker script */
-.word _sdata
-/* end address for the .data section. defined in linker script */
-.word _edata
-/* start address for the .bss section. defined in linker script */
-.word _sbss
-/* end address for the .bss section. defined in linker script */
-.word _ebss
-
-.equ  BootRAM, 0xF108F85F
 /**
  * @brief  This is the code that gets called when the processor first
- *          starts execution following a reset event. Only the absolutely
- *          necessary set is performed, after which the application
- *          supplied main() routine is called.
+ *         starts execution following a reset event.
+ *
+ *         Note: This code is different from the original ST version (rrk)
+ *
  * @param  None
  * @retval : None
 */
-
-  .section .text.Reset_Handler
+  .section .text.Reset_Handler,"ax",%progbits
   .weak Reset_Handler
   .type Reset_Handler, %function
 
 Reset_Handler:
 
-/* Copy the data segment initializers from flash to SRAM */
-  movs r1, #0
-  b LoopCopyDataInit
+  /* Copy the .data segment initializers from flash to SRAM */
+data_init:
+  ldr   r0,=_sidata /* start address of initialized data in flash */
+  ldr   r1,=_sdata  /* start address of data in SRAM */
+  ldr   r2,=_edata  /* end address of data in SRAM */
+1:
+  cmp   r1,r2
+  ittt  lo
+  ldrlo r3,[r0],#4
+  strlo r3,[r1],#4
+  blo.n 1b
 
-CopyDataInit:
-  ldr r3, =_sidata
-  ldr r3, [r3, r1]
-  str r3, [r0, r1]
-  adds r1, r1, #4
+  /* Zero fill the .bss segment. */
+bss_init:
+  ldr   r0, =_sbss; /* start address of non initialized data in SRAM */
+  ldr   r1, =_ebss; /* end address of data in SRAM */
+  movs  r2, #0
+2:
+  cmp	r0,r1
+  itt   ne
+  strne r2,[r0],#4
+  bne.n	2b
 
-LoopCopyDataInit:
-  ldr r0, =_sdata
-  ldr r3, =_edata
-  adds r2, r0, r1
-  cmp r2, r3
-  bcc CopyDataInit
-  ldr r2, =_sbss
-  b LoopFillZerobss
+  /* Configure the HSE/PLL clock system intitialization function.*/
+  bl    SystemInit
 
-/* Zero fill the bss segment. */
-FillZerobss:
-  movs r3, #0
-  str r3, [r2], #4
+  /* Call global static constructors, and _init() */
+  bl    __libc_init_array
 
-LoopFillZerobss:
-  ldr r3, = _ebss
-  cmp r2, r3
-  bcc FillZerobss
+  /* Call the application's entry point.*/
+  bl    main
 
-/* Call the HSI clock system intitialization function.*/
-  bl  SystemInit
-
-/* Call static constructors */
-  bl __libc_init_array
-
-/* Call the application's entry point.*/
-  bl main
-
-/* main should never exit, fall throught to Default_Handler*/
+  /* in the unlikely case we do exit main, fall through to Default_Handler
+  .size Reset_Handler, .-Reset_Handler
 
 /**
  * @brief  This is the code that gets called when the processor receives an
  *         unexpected interrupt.  This simply enters an infinite loop, preserving
  *         the system state for examination by a debugger.
  *
+ *         Note: this code is probably going to end up with the name of whatever is
+ *         the first exception routine that uses it as its default.
+ *
  * @param  None
  * @retval : None
-*/
-  .section .text.Default_Handler,"ax",%progbits
-
+ */
+  .section .text.Default_Handler,"ax",%progbit
 Default_Handler:
-Infinite_Loop:
-  b Infinite_Loop
+fault_loop:
+  b fault_loop
   .size Default_Handler, .-Default_Handler
+
+/*---------------------------------------------------------
+ * vector defines
+ */
+  .equ  BootRAM, 0xF108F85F
+	
 /******************************************************************************
-*
-* The minimal vector table for a Cortex M3.  Note that the proper constructs
-* must be placed on this to ensure that it ends up at physical address
-* 0x0000.0000.
-*
+* vector table for STM32F10x Medium Density cortex-m3
 ******************************************************************************/
   .section .isr_vector,"a",%progbits
-  .type g_pfnVectors, %object
-  .size g_pfnVectors, .-g_pfnVectors
+  .type __vector_table, %object
 
-g_pfnVectors:
-  /* minimum vector table */
-  .word _estack
+  /* vector table */
+__vector_table:
+  /* initial top of stack value */
+  .word __stack
+  /* exception handlers */
   .word Reset_Handler
   .word NMI_Handler
   .word HardFault_Handler
@@ -163,7 +146,7 @@ g_pfnVectors:
   .word PendSV_Handler
   .word SysTick_Handler
 #if 1
-  /* full vector table */
+  /* interrupt handlers */
   .word WWDG_IRQHandler
   .word PVD_IRQHandler
   .word TAMPER_IRQHandler
@@ -217,6 +200,7 @@ g_pfnVectors:
   .word BootRAM          /* @0x108. This is for boot in RAM mode for
                             STM32F10x Medium Density devices. */
 #endif
+  .size __vector_table, .-__vector_table
 
 /*******************************************************************************
 *
@@ -382,5 +366,4 @@ g_pfnVectors:
   .weak USBWakeUp_IRQHandler
   .thumb_set USBWakeUp_IRQHandler,Default_Handler
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
-
+/* EOF */
