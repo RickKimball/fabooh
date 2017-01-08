@@ -107,11 +107,10 @@
 /* #define DATA_IN_ExtSRAM */
 #endif /* STM32F100xE || STM32F101xE || STM32F101xG || STM32F103xE || STM32F103xG */
 
-/*!< Uncomment the following line if you need to relocate your vector Table in
-     Internal SRAM. */ 
-/* #define VECT_TAB_SRAM */
-#define VECT_TAB_OFFSET  0x0 /*!< Vector Table base offset field. 
-                                  This value must be a multiple of 0x200. */
+#ifndef VECT_TAB_OFFSET
+#define VECT_TAB_OFFSET FLASH_BASE /*!< Vector Table base offset field. 
+                                    This value must be a multiple of 0x200. */
+#endif
 
 
 /**
@@ -193,7 +192,8 @@ void SystemInit (void)
   /* Disable all interrupts and clear pending bits  */
   RCC->CIR = 0x009F0000;
     
-  SCB->VTOR = FLASH_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal FLASH. */
+  SCB->VTOR = VECT_TAB_OFFSET; /* Vector Table Relocation in Internal FLASH. */
+  //__asm__ __volatile__ ("DMB");
 }
 
 /**
