@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stm32f1xx.h>
+#include <arm_math.h>
 
 #include "cpu.h"
 #include "gpio.h"

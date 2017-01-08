@@ -376,25 +376,28 @@ private:
    * hint: .. probably not!
    */
 
+
   void _print_float(float number, unsigned digits) {
+    /* constants */
+    const float divf_10=1.0f / 10.0f;
+    const float mulf_10=10.f;
+
     // Handle negative numbers
-     if (number < 0.0f)
-     {
+     if (number < 0.0f) {
         write('-');
         number = -number;
      }
 
      // Round correctly so that print(1.999, 2) prints as "2.00"
      float rounding = 0.5f;
-     for (unsigned i=0; i < digits; i++) {
-       rounding /= 10.0f;
-     }
 
+     for (unsigned i=0; i < digits; ++i) {
+       rounding *= divf_10; // rounding /= 10.f
+     }
      number += rounding;
 
      // Extract the integer part of the number and print it
      unsigned int_part = (unsigned)number;
-     float remainder = number - (float)int_part;
      print(int_part);
 
      // Print the decimal point, but only if there are digits beyond
@@ -403,12 +406,13 @@ private:
      }
 
      // Extract digits from the remainder one at a time
-     while (digits-- > 0) {
+     float remainder = number - int_part;
 
-       remainder *= 10.0f;
+     while (digits-- > 0) {
+       remainder *= mulf_10;
        unsigned digit = unsigned(remainder);
        print(digit);
-       remainder -= digit;
+       remainder = remainder-digit;
      }
    }
 
