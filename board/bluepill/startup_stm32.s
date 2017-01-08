@@ -2,7 +2,7 @@
   *************** (C) COPYRIGHT 2016 STMicroelectronics ************************
   * @file      startup_stm32f103xb.s
   * @author    MCD Application Team
-  * @version   V4.1.0
+  * @version   V4.1.0^1
   * @date      29-April-2016
   * @brief     STM32F103xB Devices vector table for Atollic toolchain.
   *            This module performs:
@@ -41,6 +41,8 @@
   * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   *
   ******************************************************************************
+  *
+  * ^1 - rrk modified code to use IT blocks
   */
 
   .syntax unified
@@ -56,8 +58,6 @@
  * @param  None
  * @retval : None
 */
-
-  .word _sidata, _sdata, _edata, _sbss, _ebss
 
   .section .text.Reset_Handler,"ax",%progbits
   .weak Reset_Handler
@@ -77,11 +77,11 @@ data_init:
   strlo r3,[r1],#4
   blo.n 1b
 
-  /* Zero fill the .bss segment. */
+  /* Zero fill the .bss segment, assumes aligned on 4 bytes */
 bss_init:
   ldr   r0, =_sbss; /* start address of non initialized data in SRAM */
   ldr   r1, =_ebss; /* end address of data in SRAM */
-  movs  r2, #0
+  movs  r2, #0      /* word sized zero constant */
 2:
   cmp	r0,r1
   itt   ne
@@ -97,29 +97,37 @@ bss_init:
   /* Call the application's entry point.*/
   bl    main
 
-  /* in the unlikely case we do exit main, fall through to Default_Handler */
-Default_Handler:
-  b Default_Handler
 
-  .size Reset_Handler, .-Reset_Handler
+  /* in the unlikely case we do exit main, fall through to Default_Handler */
 
 /**
+ * \fn Default_Handler
  * @brief  This is the code that gets called when the processor receives an
  *         unexpected interrupt.  This simply enters an infinite loop, preserving
  *         the system state for examination by a debugger.
  *
- *         Note: this code is probably going to end up with the name of whatever is
- *         the first exception routine that uses it as its default.
+ *  Note: this code is probably going to be named using the name of one of
+ *  ISR handler function and you won't likely find the name Default_Handler
+ *  in the debug strings. Something like this:
+ *
+ *  (gdb) x/i Default_Handler
+ *  0x8000770 <WWDG_IRQHandler>:	b.n	0x8000770 <WWDG_IRQHandler>
  *
  * @param  None
  * @retval : None
  */
+  .type Default_Handler, %function
+Default_Handler:
+  b Default_Handler
+  .size Reset_Handler, .-Reset_Handler
 
-/*---------------------------------------------------------
- * vector defines
- */
-  .equ  BootRAM, 0xF108F85F
-	
+  /* try and place linker data here */
+  .section .rodata.literal_pool_Reset_Handler,"a",%progbits
+  .word _sidata, _sdata, _edata, _sbss, _ebss
+
+  .equ  BootRAM, 0xF108F85F /* hardcoded instruction at offset 0x108 of vector table */
+  /* 0x20000109 <__vector_table+265>:	ldr.w	pc, [pc, #-264]	; 0x20000004 */
+
 /******************************************************************************
 * vector table for STM32F10x Medium Density cortex-m3
 ******************************************************************************/
@@ -198,8 +206,12 @@ __vector_table:
   .word 0
   .word 0
   .word 0
-  .word BootRAM          /* @0x108. This is for boot in RAM mode for
-                            STM32F10x Medium Density devices. */
+  .word BootRAM /* Offset of 0x108 is used as the Reset Vector code
+                   when booting from RAM for STM32F10x Medium Density devices.
+                   BootRAM is an embedded instruction that jumps to the real
+                   Reset_Handle. This is dead code when running from flash
+                 */
+                          
 #endif
   .size __vector_table, .-__vector_table
 
