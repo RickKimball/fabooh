@@ -198,7 +198,7 @@ $(ELF) : $(LD_SCRIPT)
 
 $(ELF) : $(OBJS)
 	@echo 'Linking target: $(ELF)'
-	$(LD) $(LD_FLAGS_F) $(OBJS) $(LIBS) -o $@
+	$(LD) $(LD_FLAGS_F) -Wl,--start-group $(OBJS) $(LIBS) -Wl,--end-group -o $@
 	@echo ' '
 
 #-----------------------------------------------------------------------------#
