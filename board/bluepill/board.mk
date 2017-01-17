@@ -15,7 +15,7 @@ C_DEFS += -DSTM32 -DSTM32F1 -DSTM32F103C8Tx -DSTM32F103xB
 C_DEFS += -I$(FBD)$(BOARDDIR)/CMSIS/core
 C_DEFS += -I$(FBD)$(BOARDDIR)/CMSIS/device
 # flash offset
-#C_DEFS += -DVECT_TAB_OFFSET=0x08000000
+C_DEFS += -DVECT_TAB_OFFSET=0x08000000
 # ram offset
 #C_DEFS += -DVECT_TAB_OFFSET=0x20000000
 CXX_DEFS = $(C_DEFS) 
@@ -28,7 +28,7 @@ LD_FLAGS += -nostartfiles
 LD=$(CXX)
 
 OPTIMIZATION_FLAGS = -mslow-flash-data -fsingle-precision-constant
-UPLOAD_VIA ?= bmp
+UPLOAD_VIA ?= stlink
 
 ifeq ($(UPLOAD_VIA),bmp)
  BOOTLOADER = arm-none-eabi-gdb
@@ -36,6 +36,16 @@ ifeq ($(UPLOAD_VIA),bmp)
  BL_ARGS = -ex 'target extended-remote $(BL_COM)'
  BL_ARGS += -ex 'mon swdp_scan' -ex 'attach 1' -ex 'load' -batch
  BL_ARGS += $(OUT_DIR)/$(PROJECT).elf
+else ifeq ($(UPLOAD_VIA),nucleo)
+ BOOTLOADER = openocd
+ BL_ARGS = -f interface/stlink-v2-1.cfg
+ BL_ARGS += -f target/stm32f1x.cfg
+ BL_ARGS += -c "program $(OUT_DIR)/$(PROJECT).elf verify reset exit"
+else ifeq ($(UPLOAD_VIA),stlink)
+ BOOTLOADER = openocd
+ BL_ARGS = -f interface/stlink-v2.cfg
+ BL_ARGS += -f target/stm32f1x.cfg
+ BL_ARGS += -c "program $(OUT_DIR)/$(PROJECT).elf verify reset exit"
 else
  BOOTLOADER = stm32flash
  BL_COM ?= /dev/ttyUSB0
