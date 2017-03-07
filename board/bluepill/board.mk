@@ -7,7 +7,7 @@ FIXMATH_FLAGS = -DFIXMATH_NO_CACHE -DFIXMATH_NO_ROUNDING -DARM_MATH_CM3
 F_CPU ?= 72000000
 MCPU = cortex-m3
 CORE = stm32f1
-CORE_FLAGS = -mcpu=$(MCPU) -mthumb -mfloat-abi=soft
+CORE_FLAGS = -mcpu=$(MCPU) -mthumb -mfloat-abi=soft -fsigned-char
 C_STD = c11
 CXX_STD = gnu++11
 C_DEFS = -DFABOOH -DF_CPU=$(F_CPU)
@@ -27,7 +27,8 @@ LIBS ?=
 LD_FLAGS += -nostartfiles
 LD=$(CXX)
 
-OPTIMIZATION_FLAGS = -mslow-flash-data -fsingle-precision-constant
+#OPTIMIZATION_FLAGS = -mslow-flash-data -fsingle-precision-constant
+OPTIMIZATION_FLAGS = -fsingle-precision-constant
 UPLOAD_VIA ?= stlink
 
 ifeq ($(UPLOAD_VIA),bmp)
@@ -49,6 +50,6 @@ else ifeq ($(UPLOAD_VIA),stlink)
 else
  BOOTLOADER = stm32flash
  BL_COM ?= /dev/ttyUSB0
- BL_ARGS = -w $(OUT_DIR)/$(PROJECT).hex $(BL_COM)
+ BL_ARGS = -R -w $(OUT_DIR)/$(PROJECT).hex $(BL_COM)
 endif
 
