@@ -292,5 +292,6 @@ struct GPIO_PIN_LED :
 
 #define pinMode(p,m) ((p).pin_mode((m)))
 #define digitalWrite(p,v) ((v) ? (p).high() : (p).low())
+#define digitalRead(p) ( (p).value() )
 
 #endif /* GPIO_H_ */
