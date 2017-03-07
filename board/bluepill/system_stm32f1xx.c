@@ -193,7 +193,8 @@ void SystemInit (void)
   RCC->CIR = 0x009F0000;
     
   SCB->VTOR = VECT_TAB_OFFSET; /* Vector Table Relocation in Internal FLASH. */
-  //__asm__ __volatile__ ("DMB");
+
+  __DMB();
 }
 
 /**
