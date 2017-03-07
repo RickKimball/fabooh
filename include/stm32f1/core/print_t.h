@@ -85,7 +85,7 @@ public:
    *   TODO: measure cortex-m3 results
    */
 
-  template<typename T = uint32_t, const int zerofillwidth = 0, const int ascii_a = 'A' >
+  template<typename T=uint32_t, const int zerofillwidth=0, const int ascii_a='a' >
   void _print_base(T n, const base_e base) {
     static const int max_width = 8 * sizeof(T);
     char buf[max_width + 1];     // (8 * N bytes) 8 because base 2 is the worst case '11111111'
@@ -110,91 +110,45 @@ public:
     _puts(str);
   }
 
-  void print(const char * s) {
+
+  void print(char c) {
+    write(c);
+  }
+
+  void print(const char s[]) {
     _puts(s);
   }
 
-  void print(char *s) {
-    _puts(s);
+  void print(unsigned char b, const base_e base=DEC) {
+    print((unsigned long) b, base);
   }
 
-  //----------------- signed --------------------------
-  //
-  void print(int8_t i, const base_e base=DEC) {
-    if ( base == DEC && i < 0 ) {
-      write((uint8_t)'-');
-      i = -i;
+  void print(int n, const base_e base=DEC) {
+    print((long) n, base);
+  }
+
+  void print(unsigned int n, const base_e base=DEC) {
+    print((unsigned long) n, base);
+  }
+
+  void print(unsigned long n, const base_e base=DEC) {
+    print((long) n, base);
+  }
+
+  void print(long n, const base_e base=DEC) {
+    if ( base == 0) {
+      write(n);
     }
-    print((uint8_t)i, base);
-  }
-
-  void print(int16_t i, const base_e base=DEC) {
-    if ( base == DEC && i < 0 ) {
-      write((uint8_t)'-');
-      i = -i;
-    }
-    print((uint16_t)i, base);
-  }
-
-  void print(int32_t i, const base_e base=DEC) {
-    if ( base == DEC && i < 0 ) {
-      write((uint8_t)'-');
-      i = -i;
-    }
-    print((uint32_t)i, base);
-  }
-
-  //----------------- unsigned --------------------------
-  //
-
-  void print(uint8_t u, const base_e base=DEC) {
-    if ( base )
-      _print_base<uint32_t>(u, base);
-    else {
-      write((uint8_t)u);
-    }
-  }
-
-  void print(uint16_t u, const base_e base=DEC) {
-    if ( base )
-      _print_base<uint32_t>(u, base);
-    else {
-      write((uint8_t)u);
-    }
-  }
-
-  void print(uint32_t u, const base_e base=DEC) {
-    if (base) {
-      _print_base<uint32_t>(u, base);
+    else if (base == 10 || base == 1) {
+      if ( n < 0 ) {
+        write('-');
+        n = -n;
+      }
+      _print_base(n, DEC);
     }
     else {
-      write((uint8_t)u);
+      _print_base(n,base);
     }
-  }
-
-  void print(char i, const base_e base=DEC) {
-    if ( base == DEC && (signed char)i < 0 ) {
-      write((uint8_t)'-');
-      i = -(signed char)i;
-    }
-    print((uint8_t)i, base);
-  }
-
-  void print(unsigned u, const base_e base=DEC) {
-    if (base) {
-      _print_base<uint32_t>(u, base);
-    }
-    else {
-      write((uint8_t)u);
-    }
-  }
-
-  void print(int i, const base_e base=DEC) {
-    if ( base == DEC && i < 0 ) {
-      write((uint8_t)'-');
-      i = -i;
-    }
-    print((uint32_t)i, base);
   }
 
   //----------------- specials --------------------------
@@ -205,7 +159,7 @@ public:
   }
 
   void println(void) {
-    write((uint8_t)0xa);
+    print("\r\n");
   }
 
 #if 0
