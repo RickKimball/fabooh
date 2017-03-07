@@ -20,11 +20,13 @@
 #include <stm32f1xx.h>
 #include <arm_math.h>
 
+#include "bitband.h"    /* grab these headers from the board directory */
+#include "ringbuffer.h"
 #include "cpu.h"
 #include "gpio.h"
 #include "print.h"
 #include "serial.h"
 
-#include <pins.h>   /* from board directory */
+#include <pins.h>       /* from variant directory */
 
 #endif /* FABOOH_H_ */
