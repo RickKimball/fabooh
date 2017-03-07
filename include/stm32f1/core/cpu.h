@@ -22,21 +22,46 @@ struct cpu_base_t {
   }
 };
 
-typedef cpu_base_t<F_CPU> CPU;
+typedef cpu_base_t<F_CPU > CPU;
 
 extern "C" {
-  volatile uint32_t tickcount;
+volatile uint32_t tickcount;
 
-  uint32_t millis(void) {
-    return tickcount;
-  }
+uint32_t millis(void) {
+  return tickcount;
+}
 
-  /*
-   * vector table systick handler must have c name bindings
-   */
-  void SysTick_Handler(void) {
-    ++tickcount;
-  }
+/*
+ * vector table systick handler must have c name bindings
+ */
+void SysTick_Handler(void) {
+  ++tickcount;
+}
+
+}
+
+/**
+ * @brief Delay the given number of microseconds.
+ *
+ * @param us Number of microseconds to delay.
+ */
+static inline void delay_us(uint32_t us) {
+  us *= 20; /*STM32_DELAY_US_MULT */
+
+  /* fudge for function call overhead  */
+  us--;
+  asm volatile(
+      "   mov r0, %[us]          \n\t"
+      "1: subs r0, #1            \n\t"
+      "   bhi 1b                 \n\t"
+      :
+      : [us] "r" (us)
+      : "r0"
+  );
+}
+
+void delayMicroseconds(uint32_t us) {
+  delay_us(us);
 }
 
 /*
