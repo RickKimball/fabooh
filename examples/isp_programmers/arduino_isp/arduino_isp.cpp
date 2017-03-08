@@ -40,7 +40,7 @@ _CLK_PIN    CLK_PIN;   /* ~1MHz rescue clock */
 BitBangedSPI<_PIN_SCK,_PIN_MISO,_PIN_MOSI> SPI;  // use a bitbang SPI use the 5v tolerant pins SPI
 
 namespace {
-  typedef serial_default_t<BAUD_RATE, CPU::frequency, TX1_PIN, RX1_PIN > serial;
+  typedef serial_usart_isr_t<BAUD_RATE, CPU::frequency, TX1_PIN, RX1_PIN > serial;
   serial Serial;
 }
 

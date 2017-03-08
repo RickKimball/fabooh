@@ -23,17 +23,15 @@ struct serial_usart_isr_t:
 template <const uint32_t BAUD, const uint32_t MCLK_HZ, typename TXPIN, typename RXPIN>
 struct serial_usart_basic_t:
     public usart_basic_t<BAUD, MCLK_HZ, TXPIN, RXPIN>,
-    public print_t< serial_usart_isr_t<BAUD, MCLK_HZ, TXPIN, RXPIN> >
+    public print_t< serial_usart_basic_t<BAUD, MCLK_HZ, TXPIN, RXPIN> >
 {
 };
 
 template <const uint32_t BAUD, const uint32_t MCLK_HZ, typename TXPIN, typename RXPIN>
-struct serial_default_t: public serial_usart_isr_t<BAUD, MCLK_HZ, TXPIN, RXPIN>
+struct serial_default_t: public serial_usart_basic_t<BAUD, MCLK_HZ, TXPIN, RXPIN>
 {
 };
 
-
-// TODO: implement a Timer based software version
 // TODO: enhanced software version to support port pin triggering
 // TODO: add timeout option
 
