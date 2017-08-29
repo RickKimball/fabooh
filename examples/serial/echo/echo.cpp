@@ -11,16 +11,22 @@
 
 namespace {
   const uint32_t BAUD_RATE = 9600;
-#if defined(__MSP430G2231__) || defined(__MSP430G2452__)
-  timer_serial_t<BAUD_RATE, CPU::frequency, TX_PIN, RX_PIN> Serial; // TX=varies, RX=varies
+#if 0
+  // pick one serial implementation
+#elif 1 && defined(__MSP430G2231__) || defined(__MSP430G2452__)
+  timer_serial_t<BAUD_RATE, CPU::frequency, TX_PIN, RX_PIN> Serial;
+#elif 1 && defined(STM32F1)
+  serial_usart_isr_t<BAUD_RATE, CPU::frequency, TX_PIN, RX_PIN> Serial;
+  USART_IRQHandler(1,Serial)
 #else
-  serial_default_t<BAUD_RATE, CPU::frequency, TX_PIN, RX_PIN> Serial; // TX=varies, RX=varies
+  serial_default_t<BAUD_RATE, CPU::frequency, TX_PIN, RX_PIN> Serial;
 #endif
-  const char *prompt = "\r\ntype here:\r";
+
+  const char *prompt = "\r\ntype here:\r\n";
 }
 
 void setup() {
-  Serial.begin(BAUD_RATE);                 // configure serial device for Timer or SW only serial
+  Serial.begin(BAUD_RATE);	// configure serial device for Timer or SW only serial
 }
 
 void loop() {
@@ -28,15 +34,19 @@ void loop() {
 
   for (;;) {
     int c;
-    // use a blocking read to get a character
-    switch ((c = Serial.read())) {
-
+    
+    c = Serial.read();
+    switch ( c ) {
     case '\r':
       return;
-
+      
+    case -1:
+      break;
+      
     default:
       Serial.write(c);
       break;
     }
   }
 }
+
