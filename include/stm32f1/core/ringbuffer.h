@@ -46,10 +46,10 @@
      enforce at compile time that SIZE is power of 2 and >= 2
 */
 
-template<unsigned SIZE>
+template<unsigned N>
 struct is_power_of_two {
-  enum {val = (SIZE >= 2) & (SIZE > 1) & !(SIZE & (SIZE - 1))};
-  static const unsigned badSIZE[(val == 1) ? 1 : -1]; // SIZE is not a power of 2 if you an error here.
+  enum {val = (N >= 2) & !(N & (N - 1))};
+  static const unsigned badSIZE[(val == 1) ? 1 : -1]; // N is not a power of 2 if you an error here.
 };
 
 /**
@@ -59,11 +59,11 @@ struct is_power_of_two {
 */
 union uint16x2_t {
   // access as 32 bit
-  unsigned long both;
+  uint32_t both;
   // -- or as 2 16 bit values --
   struct {
-    unsigned head: 16;
-    unsigned tail: 16;
+    uint16_t head;
+    uint16_t tail;
   };
 };
 
@@ -98,7 +98,7 @@ struct ringbuffer_t {
   }
 
   // return the count of used slots
-  size_t available() {
+  size_t inline available() {
     register uint16x2_t temp = { offsets.both };
 
     temp.both = (temp.head - temp.tail) & CAPACITY;
@@ -107,7 +107,7 @@ struct ringbuffer_t {
   }
 
   // return maximum number of slots available
-  size_t capacity() {
+  size_t inline capacity() {
     return CAPACITY;
   }
 
@@ -136,7 +136,7 @@ struct ringbuffer_t {
    *
    * Note: affects head, reads tail, element ignored if overflow ~300 ns @72MHz
    */
-  void push_back(const T element) {
+  void inline push_back(const T element) {
     register uint16x2_t temp = { offsets.both };
     register uint16_t temp_head = temp.head;
 
@@ -151,7 +151,7 @@ struct ringbuffer_t {
   }
 
   // element inserter with bounds checking
-  void push_back_nc(const T element) {
+  void inline push_back_nc(const T element) {
     register uint16_t temp_head = offsets.head;
 
     elements[temp_head++] = element;
@@ -160,7 +160,7 @@ struct ringbuffer_t {
   }
 
   // affects tail, reads head
-  POP_T pop_front(void) {
+  POP_T inline pop_front(void) {
     register uint16x2_t temp = { offsets.both };
 
     if ( (temp.head - temp.tail) & CAPACITY ) { // !empty
@@ -173,7 +173,7 @@ struct ringbuffer_t {
   }
 
   // no bounds check extractor, affects tail
-  POP_T pop_front_nc(void) {
+  POP_T inline pop_front_nc(void) {
     register uint16_t temp_tail = offsets.tail;
 
     POP_T elem = elements[temp_tail++];
@@ -193,4 +193,3 @@ struct ringbuffer_t {
 };
 
 #endif /* RINGBUFFER_T_H_ */
-

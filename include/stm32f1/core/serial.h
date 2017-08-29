@@ -12,6 +12,7 @@
 #define SERIAL_H_
 
 #include "usart_basic.h"
+#include "usart_isr.h"
 
 template <const uint32_t BAUD, const uint32_t MCLK_HZ, typename TXPIN, typename RXPIN>
 struct serial_usart_isr_t:
