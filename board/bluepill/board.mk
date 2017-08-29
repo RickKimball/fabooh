@@ -22,7 +22,7 @@ CXX_DEFS = $(C_DEFS)
 AS_DEFS =
 LD_SCRIPT = $(FBD)$(BOARDDIR)/stm32f103c8.ld
 LD_FLAGS = -T$(LD_SCRIPT) -g -Wl,-Map=$(OUT_DIR_F)$(PROJECT).map,--cref,--no-warn-mismatch
-LD_FLAGS += -Wl,--gc-sections -specs=nosys.specs -specs=nano.specs
+LD_FLAGS += -Wl,--gc-sections --specs=nosys.specs --specs=nano.specs
 LIBS ?=
 LD_FLAGS += -nostartfiles
 LD=$(CXX)
