@@ -34,15 +34,15 @@ void loop() {
 
   for (;;) {
     int c;
-    
+
     c = Serial.read();
     switch ( c ) {
     case '\r':
       return;
-      
+
     case -1:
       break;
-      
+
     default:
       Serial.write(c);
       break;
