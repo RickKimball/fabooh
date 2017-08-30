@@ -21,7 +21,7 @@
 #include <main.h>
 #include <serial.h>
 
-typedef uint8_t counter_t; /* type we use for counting from ' ' -> '~' */
+typedef int counter_t; /* type we use for counting from ' ' -> '~' */
 
 //------- file space globals ------
 namespace {
@@ -55,13 +55,13 @@ void loop()
   // byte. The serial monitor interprets all bytes as
   // ASCII, so 32, the first number,  will show up as ' ' AKA a space
 
-  Serial.print(thisByte, RAW);
+  Serial.print((char)thisByte);
 
   // base 10
   Serial.print(", dec: "); Serial.print(thisByte);
 
   // base 8
-  Serial.print(", oct: 0"); Serial.print(thisByte,OCT);
+  Serial.print(", oct: \\0"); Serial.print(thisByte,OCT);
 
   // base 16
   Serial.print(", hex: 0x"); Serial.print(thisByte,HEX);
