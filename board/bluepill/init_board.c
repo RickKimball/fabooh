@@ -129,11 +129,14 @@ void _init(void) {
   // perform board level initialization here
   // enable RCC Clock for GPIO A,B,C,D,ALT IO, USART1
   RCC->APB2ENR |= (
-         RCC_APB2ENR_IOPAEN
+         RCC_APB2ENR_AFIOEN
+       | RCC_APB2ENR_IOPAEN
        | RCC_APB2ENR_IOPBEN
        | RCC_APB2ENR_IOPCEN
-       | RCC_APB2ENR_IOPDEN
-       | RCC_APB2ENR_AFIOEN
+       | RCC_APB2ENR_ADC1EN
+       | RCC_APB2ENR_ADC2EN
+       | RCC_APB2ENR_TIM1EN
+       | RCC_APB2ENR_SPI1EN
        | RCC_APB2ENR_USART1EN
        );
 
