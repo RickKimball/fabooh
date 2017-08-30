@@ -87,21 +87,21 @@ struct usart_isr_t :
  * Note: The user must instance this macro once in their program
  */
 #define USART_IRQHandler(N, SERIAL_) \
-extern "C" void USART##N##_IRQHandler(void)                                      \
-{									                                                               \
-  if ( SERIAL_.is_rx_isr_enabled() && (SERIAL_.USARTx()->SR & USART_SR_RXNE) ) { \
-    SERIAL_.rx_buffer.push_back((SERIAL_.USARTx()->DR & 0xff));		               \
-  }									                                                             \
-									                                                               \
-  if (  SERIAL_.is_tx_isr_enabled() && (SERIAL_.USARTx()->SR & USART_SR_TXE) ) { \
-    if ( SERIAL_.tx_buffer.isEmpty()) {					                                 \
-      SERIAL_.disable_tx_isr();						                                       \
-      SERIAL_.flag_tx_primed = 0;					                                       \
-    }									                                                           \
-    else {								                                                       \
-      SERIAL_.USARTx()->DR = SERIAL_.tx_buffer.get() & 0xff;		                 \
-    }                                                                            \
-  }                                                                              \
+extern "C" void USART##N##_IRQHandler(void)                                       \
+{                                                                                 \
+  if ( SERIAL_.is_rx_isr_enabled() && (SERIAL_.USARTx()->SR & USART_SR_RXNE) ) {  \
+    SERIAL_.rx_buffer.push_back((SERIAL_.USARTx()->DR & 0xff));                   \
+  }                                                                               \
+\
+  if (  SERIAL_.is_tx_isr_enabled() && (SERIAL_.USARTx()->SR & USART_SR_TXE) ) {  \
+    if ( SERIAL_.tx_buffer.isEmpty()) {                                           \
+      SERIAL_.disable_tx_isr();                                                   \
+      SERIAL_.flag_tx_primed = 0;                                                 \
+    }                                                                             \
+    else {                                                                        \
+      SERIAL_.USARTx()->DR = SERIAL_.tx_buffer.get() & 0xff;                      \
+    }                                                                             \
+  }                                                                               \
 }
 
 #endif
