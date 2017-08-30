@@ -94,23 +94,14 @@ enum pin_crx_speed_e {
   PIN_CRX_CNF_MASK=GPIO_CRL_CNF0_Msk | GPIO_CRL_MODE0_Msk
 };
 
-// TODO: figure out why print_t whines when i make this a real enum
-#if 0
  enum pin_cnf_mode_in_e {
-   PIN_INPUT_ANALOG 0b0000
-  ,PIN_INPUT_FLOATING 0b0100
-  ,PIN_INPUT_PULLDOWN 0b1000
-  ,PIN_INPUT_PULLUP 0b1000
- }
-#else
- typedef uint32_t pin_cnf_mode_in_e;
-  #define PIN_INPUT_ANALOG 0b0000
-  #define PIN_INPUT_FLOATING 0b0100
-  #define PIN_INPUT_PULLDOWN 0b1000
-  #define PIN_INPUT_PULLUP 0b1000
-#endif
+   PIN_INPUT_ANALOG=0b0000
+  ,PIN_INPUT_FLOATING=0b0100
+  ,PIN_INPUT_PULLDOWN=0b1000
+  ,PIN_INPUT_PULLUP=0b1000
+ };
 
-enum pin_cnf_mode_out_e {
+ enum pin_cnf_mode_out_e {
   PIN_PUSHPULL_OUT=0b0000,
   PIN_OPENDRAIN_OUT=0b0100,
   PIN_ALT_PUSHPULL_OUT=0b1000,
@@ -148,6 +139,9 @@ struct GPIO_PIN : GPIO_TypeDef {
 
     case 4:
       return *GPIOD;
+
+    default:
+      return *GPIOA;
     }
   }
 
