@@ -9,10 +9,10 @@
 #ifndef USART_ISR_H_
 #define USART_ISR_H_
 
-#include "usart_basic.h"
+#include "usart_core.h"
 
 /*
- * usart_isr_t - non blocking USART using ISR handler
+ * usart_isr_t - non-blocking USART using ISR handler
  *
  */
 template <const uint32_t BAUD, const uint32_t MCLK_HZ, typename TXPIN, typename RXPIN>
@@ -82,26 +82,26 @@ struct usart_isr_t :
 };
 
 /*
- * USART_IRQHandler - a 'C' language USART[123]_IRQHandler macro
+ * USART_IRQHandler - 'C' language macro for USART[123]_IRQHandler
  *
  * Note: The user must instance this macro once in their program
  */
 #define USART_IRQHandler(N, SERIAL_) \
-extern "C" void USART##N##_IRQHandler(void) \
-{									\
+extern "C" void USART##N##_IRQHandler(void)                                      \
+{									                                                               \
   if ( SERIAL_.is_rx_isr_enabled() && (SERIAL_.USARTx()->SR & USART_SR_RXNE) ) { \
-    SERIAL_.rx_buffer.push_back((SERIAL_.USARTx()->DR & 0xff));		\
-  }									\
-									\
+    SERIAL_.rx_buffer.push_back((SERIAL_.USARTx()->DR & 0xff));		               \
+  }									                                                             \
+									                                                               \
   if (  SERIAL_.is_tx_isr_enabled() && (SERIAL_.USARTx()->SR & USART_SR_TXE) ) { \
-    if ( SERIAL_.tx_buffer.isEmpty()) {					\
-      SERIAL_.disable_tx_isr();						\
-      SERIAL_.flag_tx_primed = 0;					\
-    }									\
-    else {								\
-      SERIAL_.USARTx()->DR = SERIAL_.tx_buffer.get() & 0xff;		\
-    }									\
-  }									\
+    if ( SERIAL_.tx_buffer.isEmpty()) {					                                 \
+      SERIAL_.disable_tx_isr();						                                       \
+      SERIAL_.flag_tx_primed = 0;					                                       \
+    }									                                                           \
+    else {								                                                       \
+      SERIAL_.USARTx()->DR = SERIAL_.tx_buffer.get() & 0xff;		                 \
+    }                                                                            \
+  }                                                                              \
 }
 
 #endif
