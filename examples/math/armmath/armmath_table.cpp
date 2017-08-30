@@ -17,10 +17,10 @@ namespace {
   typedef serial_default_t<BAUD_RATE, CPU::frequency, TX_PIN, NO_PIN> serial;
   serial Serial;
 
-  LED_BUILTIN_ LED;
+  LED_BUILTIN timing_pin;
 
-  float deg_rad_const = M_PI/180.0f;
-  float f_1=1.0f;
+  static float deg_rad_const = M_PI/180.0f;
+  static float f_1=1.0f;
 }
 
 /* use ARM_MATH_CM3 sine code */
@@ -36,7 +36,7 @@ float sind(float deg_angle) {
 
 void setup() {
   Serial.begin(BAUD_RATE);
-  LED.setmode_output();
+  timing_pin.setmode_output();
 }
 
 void loop()
@@ -47,9 +47,9 @@ void loop()
   Serial << "Table of Sin(a)" << endl;
 
   for (x = -90; x <= 90; x++, angle += f_1 ) {
-    LED = 1;
+    timing_pin = 1;
     float sin_value=sind(angle);
-    LED = 0;
+    timing_pin = 0;
 
     Serial << "angle = " << _FLOAT(angle,2)
            << " sin =  " << _FLOAT(sin_value, 5) 
