@@ -1,5 +1,7 @@
 /*
  * pins.h - bluepill pin map
+ *
+ *   stm32f103c8t6 module from ebay / aliexpress AKA bluepill
  */
 
 #ifndef PINS_H_
@@ -43,7 +45,9 @@ typedef GPIO_PIN<3,13> PC13;
 typedef GPIO_PIN<3,14> PC14;
 typedef GPIO_PIN<3,15> PC15;
 
-typedef GPIO_PIN_LED<3,13,false> LED_BUILTIN_;
+typedef GPIO_PIN<0,0xFFFF> NO_PIN;
+
+typedef GPIO_PIN_LED<3,13,false> LED_BUILTIN;
 
 typedef PA9 TX1_PIN;
 typedef PA10 RX1_PIN;
@@ -53,8 +57,6 @@ typedef PA3 RX2_PIN;
 
 typedef PB10 TX3_PIN;
 typedef PB11 RX3_PIN;
-
-typedef GPIO_PIN<0,0xFFFF> NO_PIN;
 
 typedef TX1_PIN TX_PIN;
 typedef RX1_PIN RX_PIN;
