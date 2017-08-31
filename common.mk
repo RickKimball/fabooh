@@ -28,14 +28,7 @@
 FBD := $(dir $(lastword $(MAKEFILE_LIST)))
 
 # which board will be used as default
-#BOARD ?= msp430g2553in20
-#BOARD ?= msp430g2452in20
-#BOARD ?= msp430g2231in14
-#BOARD ?= msp430fr5969
-#BOARD ?= lpc1114fn28
-BOARD ?= bluepill
-BOARDDIR = board/$(BOARD)
-BOARDS = $(notdir $(wildcard $(FBD)board/*))
+include $(FBD)/common_board.mk
 _3RD_PARTY_DIR = include/3rdparty
 
 FIXMATH_FLAGS ?= -DFIXMATH_NO_CACHE -DFIXMATH_NO_64BIT -DFIXMATH_NO_ROUNDING

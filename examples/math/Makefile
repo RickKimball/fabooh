@@ -1,22 +1,18 @@
 all:
-	make -C sin_table all
+	make -C armmath all
 	make -C cordic all
 	make -C fixmath all
-ifeq ($(BOARD),bluepill)
-	make -C armmath all
-endif
+	make -C sin_table all
 
 clean:
-	make -C sin_table clean
+	make -C armmath clean
 	make -C cordic clean
 	make -C fixmath clean
-	make -C armmath clean
+	make -C sin_table clean
 
 install: all
-	make -C sin_table install
+	make -C armmath install
 	make -C cordic install
 	make -C fixmath install
-ifeq ($(BOARD),bluepill)
-	make -C armmath install
-endif
+	make -C sin_table install
 
