@@ -37,7 +37,7 @@ typedef GPIO_PIN<(1 << 8),P1> P1_8;
 typedef GPIO_PIN<(1 << 9),P1> P1_9;
 
 typedef P1_8 RED_LED;
-typedef RED_LED LED_BUILTIN_;
+typedef RED_LED LED_BUILTIN;
 typedef P1_7 TX_PIN;
 typedef P1_6 RX_PIN;
 

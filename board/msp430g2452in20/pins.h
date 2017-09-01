@@ -61,6 +61,8 @@
  typedef P1_6 MOSI;
  typedef P1_7 MISO;
 
+ typedef RED_LED LED_BUILTIN;
+
 #endif
 
 /*

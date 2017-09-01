@@ -166,6 +166,8 @@
  typedef PJ_1 LED2;
  typedef PJ_2 LED3;
  typedef PJ_3 LED4;
+
+ typedef RED_LED LED_BUILTIN;
 #endif
 
 #ifdef __MSP430_HAS_PORT3_R__

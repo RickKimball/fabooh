@@ -154,7 +154,7 @@
 
  #endif /* __MSP430_HAS_PORTJ_R__ */
 
- typedef RED_LED LED_BUILTIN_;
+ typedef RED_LED LED_BUILTIN;
  typedef P1_0 LED2;
  typedef P4_6 LED1;
  typedef GPIO_PIN<BIT1, P4, gpio_pin_button > S1;
