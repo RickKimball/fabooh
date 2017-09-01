@@ -1,12 +1,8 @@
 all:
 	@make -C spi_bb all
+	@make -C utc1903_test all
 
 clean:
 	@make -C spi_bb clean
-
-install: all
-	@make -C spi_bb install
-
-debug: all
-	@make -C spi_bb debug
+	@make -C utc1903_test clean
 
