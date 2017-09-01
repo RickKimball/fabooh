@@ -45,7 +45,7 @@ typedef GPIO_PIN<3,13> PC13;
 typedef GPIO_PIN<3,14> PC14;
 typedef GPIO_PIN<3,15> PC15;
 
-typedef GPIO_PIN<0,0xFFFF> NO_PIN;
+typedef GPIO_NOPIN<0,0xFFFF> NO_PIN;
 
 typedef GPIO_PIN_LED<3,13,false> LED_BUILTIN;
 
@@ -60,5 +60,11 @@ typedef PB11 RX3_PIN;
 
 typedef TX1_PIN TX_PIN;
 typedef RX1_PIN RX_PIN;
+
+
+typedef PA4 CS;
+typedef PA3 SCLK;
+typedef PA2 MOSI;
+typedef PA1 MISO;
 
 #endif
