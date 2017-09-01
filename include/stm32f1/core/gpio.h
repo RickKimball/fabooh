@@ -91,21 +91,31 @@ enum pin_crx_speed_e {
   PIN_SPEED_50MHZ=0b0011,
   PIN_SPEED_HIGH=0b0011,
 
-  PIN_CRX_CNF_MASK=GPIO_CRL_CNF0_Msk | GPIO_CRL_MODE0_Msk
+  PIN_CRX_CNF_MASK=(GPIO_CRL_CNF0_Msk | GPIO_CRL_MODE0_Msk)
 };
 
+#if 1
+ // this should work to force 32bit enum but doesn't seem to
  enum pin_cnf_mode_in_e {
-   PIN_INPUT_ANALOG=0b0000
-  ,PIN_INPUT_FLOATING=0b0100
-  ,PIN_INPUT_PULLDOWN=0b1000
-  ,PIN_INPUT_PULLUP=0b1000
+   PIN_INPUT_ANALOG   = 0UL
+  ,PIN_INPUT_FLOATING = 0b0100
+  ,PIN_INPUT_PULLDOWN = 0b1000
+  ,PIN_INPUT_PULLUP   = 0b1000
+  ,PIN_MAX            = 0xFFFFFFFF
  };
+#else
+typedef uint32_t pin_cnf_mode_in_e;
+#define PIN_INPUT_ANALOG   0b0000
+#define PIN_INPUT_FLOATING 0b0100
+#define PIN_INPUT_PULLDOWN 0b1000
+#define PIN_INPUT_PULLUP   0b1000
+#endif
 
  enum pin_cnf_mode_out_e {
-  PIN_PUSHPULL_OUT=0b0000,
-  PIN_OPENDRAIN_OUT=0b0100,
-  PIN_ALT_PUSHPULL_OUT=0b1000,
-  PIN_ALT_OPENDRAIN_OUT=0b1100,
+   PIN_PUSHPULL_OUT      = 0b0000
+  ,PIN_OPENDRAIN_OUT     = 0b0100
+  ,PIN_ALT_PUSHPULL_OUT  = 0b1000
+  ,PIN_ALT_OPENDRAIN_OUT = 0b1100
 };
 
 /*
@@ -175,7 +185,7 @@ struct GPIO_PIN : GPIO_TypeDef {
     volatile uint32_t * const crx_reg = (pin_no < 8) ? &GPIOx().CRL : &GPIOx().CRH;
 
     uint32_t temp = *crx_reg;
-    temp = (temp & ~(PIN_CRX_CNF_MASK << offset)) | ((cnf_mode) << offset);
+    temp = (temp & ~(PIN_CRX_CNF_MASK << offset)) | (((unsigned long)cnf_mode) << offset);
     *crx_reg = temp;
 
     if (cnf_mode == PIN_INPUT_PULLUP) {
@@ -280,6 +290,69 @@ struct GPIO_PIN_LED :
           off();
       }
 
+};
+
+/*
+ * GPIO_NOPIN - GPIO pin that does nothing
+ */
+
+template<const uint32_t gpio_port_no, const uint32_t pin_no>
+struct GPIO_NOPIN : GPIO_TypeDef {
+
+  static uint32_t port_pin(void) { return (gpio_port_no << 16) | pin_no; }
+
+  static uint32_t port(void) { return gpio_port_no; }
+
+  static uint32_t pin(void) { return pin_no; }
+
+  static uint32_t pin_mask(void) { return 1 << pin_no; }
+
+  static GPIO_TypeDef & GPIOx(void) {
+      return 0;
+  }
+
+  void pin_mode(pin_mode_e mode) {
+  }
+
+  void setmode_input(pin_cnf_mode_in_e cnf_mode = PIN_INPUT_FLOATING) {
+  }
+
+  /*
+   * setmode_output - defaults to Push/Pull @ 50MHz
+   *
+   * modifies both CNF and CRX (CRL/CRH) register settings
+   */
+  void setmode_output(pin_crx_speed_e speed=PIN_SPEED_50MHZ, pin_cnf_mode_out_e cnf_mode=PIN_PUSHPULL_OUT ) {
+  }
+
+  void clear(void) {
+  }
+
+  void high(void) {
+  }
+
+  void low(void) {
+  }
+
+  void reset(void) {
+  }
+
+  void set(void) {
+  }
+
+  void toggle(void) {
+  }
+
+  int value(void) {
+    return 0;
+  }
+
+  void operator=(const int value) {
+  }
+
+  operator int() {
+    return 0;
+  }
 };
 
 //--- Arduino API concessions ---
