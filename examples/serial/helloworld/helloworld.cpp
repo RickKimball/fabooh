@@ -1,5 +1,5 @@
 /**
- * helloworld.cpp - an msp430g2xxx specific watchdog timer example
+ * helloworld.cpp - minimal serial example with a variety of uart implementations
  *
  * msp430-size msp430g2553in20_release/helloworld.elf
  *  text	   data	    bss	    dec	    hex	filename
@@ -17,18 +17,23 @@
 
  #if 0
    sw_serial_t<9600, CPU::frequency, TX_PIN, NO_PIN> Serial;
+ #elif 0
+   usci_serial_t< 9600, CPU::frequency, TX_PIN, NO_PIN > Serial;
+ #elif 0
+   timer_serial_t< 9600, CPU::frequency, TX_PIN, NO_PIN > Serial;
  #else
-   usci_serial_t < 9600, CPU::frequency, TX_PIN, NO_PIN > Serial;
+   serial_default_t< 9600, CPU::frequency, TX_PIN, NO_PIN > Serial;
  #endif
 
 #elif defined(STM32F1)
 
- #if 1
+ #if 0
    serial_usart_isr_t<9600, CPU::frequency, TX_PIN, NO_PIN> Serial;
    USART_IRQHandler(1,Serial)
  #else
    serial_default_t<9600, CPU::frequency, TX_PIN, NO_PIN> Serial;
  #endif
+
 #else
    serial_default_t<9600, CPU::frequency, TX_PIN, NO_PIN> Serial;
 #endif
