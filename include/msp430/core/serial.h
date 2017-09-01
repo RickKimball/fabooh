@@ -29,7 +29,9 @@
 #include "drivers/usciserial430.h"
 #include "drivers/eusciserial430.h"
 #include "drivers/swserial430.h"
+#if !defined(__MSP430X__)
 #include "drivers/timerserial430.h"
+#endif
 
 //------------------------------------------------------------------------
 // mix-in some serial and print to form a working serial class

@@ -21,7 +21,7 @@
 #include <main.h>
 #include <serial.h>
 
-typedef long counter_t; /* type we use for counting from ' ' -> '~' */
+typedef unsigned counter_t; /* type we use for counting from ' ' -> '~' */
 
 //------- file space globals ------
 namespace {
