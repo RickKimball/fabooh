@@ -8,6 +8,7 @@
 #define SPI_MODE0 0x00
 #define MSBFIRST 0x00
 
+#if 0
 class SPISettings {
   public:
     // clock is in Hz
@@ -19,6 +20,7 @@ class SPISettings {
   public:
     uint32_t clock;
 };
+#endif
 
 template< typename PIN_SCK, typename PIN_MISO, typename PIN_MOSI >
 struct BitBangedSPI {

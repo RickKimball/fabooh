@@ -12,7 +12,7 @@
 #include <main.h>
 
 #include "configuration.h"
-#include "bitbangedspi.h"
+//#include "bitbangedspi.h"
 #include "stk500k.h"
 
 #define beget16(addr) ((*addr) << 8 | *(addr+1) )
@@ -24,6 +24,7 @@ unsigned int here;    // address for reading and writing, set by 'U' command
 uint8_t buff[256];    // global block storage
 parameter param;      // device parameter structure values
 
+#if 0
 //HardwareTimer external_clk_timer(1);  // optional rescue external clock PA8 is on TIMER1
 _PIN_SCK    PIN_SCK;    /* these 4 pins were selected because they are 5V tolerant */
 _PIN_MISO   PIN_MISO;   /* we use bitbanged spi to make life simpler */
@@ -38,6 +39,16 @@ _CLK_PIN    CLK_PIN;   /* ~1MHz rescue clock */
                        /* useful to recover bad fuse setting */
 
 BitBangedSPI<_PIN_SCK,_PIN_MISO,_PIN_MOSI> SPI;  // use a bitbang SPI use the 5v tolerant pins SPI
+#else
+SCLK        PIN_SCLK;
+_PIN_RESET  PIN_RESET;
+
+_LED_HB     LED_HB;    /* (led builtin) shows the programmer is running */
+_LED_ERR    LED_ERR;   /* (red led) Lights up if something goes wrong */
+_LED_PMODE  LED_PMODE; /* (blue led) In communication with the slave */
+typedef spi_attr_t<SPI_MODE1> SPI_MODE1_A;
+spi_bitbang_t<CS, SCLK, MOSI, MISO, SPI_MODE1_A  > SPI;  // use a bitbang SPI use the 5v tolerant pins SPI
+#endif
 
 namespace {
   typedef serial_usart_isr_t<BAUD_RATE, CPU::frequency, TX1_PIN, RX1_PIN > serial;
@@ -275,7 +286,7 @@ void prog_lamp(int state, bool useDelay) {
 //----------------------------------------------------------------------
 void start_pmode() {
 
-  // Reset target before driving PIN_SCK or PIN_MOSI
+  // Reset target before driving PIN_SCLK or PIN_MOSI
 
   reset_target(true); // force the pin low
 
@@ -287,13 +298,13 @@ void start_pmode() {
   // (reset_target() first sets the correct level)
 
   SPI.begin();
-  SPI.beginTransaction(SPISettings(SPI_CLOCK, MSBFIRST, SPI_MODE0));
+  SPI.beginTransaction(SPISettings(SPI_CLOCK, MSBLSB, SPI_MODE0));
 
   // See avr datasheets, chapter "SERIAL_PRG Programming Algorithm":
 
-  // Pulse RESET after PIN_SCK is low:
-  digitalWrite(PIN_SCK, LOW);
-  delay(50); // discharge PIN_SCK, value arbitrarily chosen
+  // Pulse RESET after PIN_SCLK is low:
+  digitalWrite(PIN_SCLK, LOW);
+  delay(50); // discharge PIN_SCLK, value arbitrarily chosen
   reset_target(false); // let it float high
   // Pulse must be minimum 2 target CPU clock cycles
   // so 500 usec is overkill for CPU speeds above 20KHz

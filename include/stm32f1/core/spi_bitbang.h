@@ -54,6 +54,7 @@ struct spi_bitbang_t: spi_base_t<CS, SCLK, MOSI, MISO, ATTR > {
     pulseWidth = (500000 + settings.clock - 1) / settings.clock;
     if (pulseWidth == 0)
       pulseWidth = 1;
+    pulseWidth = 3;
   }
 
   void begin() {
@@ -141,6 +142,10 @@ struct spi_bitbang_t: spi_base_t<CS, SCLK, MOSI, MISO, ATTR > {
       delay_us(2);
     }
     return b;
+  }
+
+  unsigned get_pulseWidth() {
+	return pulseWidth;
   }
 
 private:
