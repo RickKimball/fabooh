@@ -3,7 +3,6 @@
  */
 
 #include <fabooh.h>
-#define SMALL_INT4
 #include <main.h>
 
 // instance the built-in LED
