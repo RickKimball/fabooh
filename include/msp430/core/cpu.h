@@ -41,11 +41,13 @@ struct cpu_base_t {
 };
 
 #if defined(__MSP430_HAS_BC2__)
-#include "drivers/cpu430_bc2.h"
+ #include "drivers/cpu430_bc2.h"
+#elif defined(__MSP430_HAS_FRAM__)
+ #include "drivers/cpu430_cs_fram.h"
 #elif defined(__MSP430_HAS_CS__)
-#include "drivers/cpu430_cs.h"
+ #include "drivers/cpu430_cs.h"
 #else
-#error Unsupported CPU detected!
+ #error Unsupported CPU detected!
 #endif
 
 #define delay_msecs(msec) __delay_cycles(CPU::msec_cycles * msec)

@@ -10,7 +10,7 @@ C_DEFS = -DFABOOH -DF_CPU=$(MCLK_FREQ)
 CXX_DEFS = -DFABOOH -DF_CPU=$(MCLK_FREQ)
 LD_SCRIPT = $(FBD)$(BOARDDIR)/dummy.ld
 LD_FLAGS = $(CORE_FLAGS) -mdisable-watchdog -Wl,--gc-sections,-Map=$(OUT_DIR_F)$(PROJECT).map,-umain
-OPTIMIZATION += -ffunction-sections -fdata-sections
+OPTIMIZATION += -ffunction-sections -fdata-sections -Os
 LD=$(CC)
 
 BOOTLOADER = mspdebug

@@ -38,6 +38,7 @@ struct cpu430_cs_t
 
 	static void init_clock(void) {
 
+#if 0
 	  CSCTL0 = CSKEY;                // Enable Access to CS Registers
     CSCTL2 &= ~SELM_7;             // Clear selected Main CLK Source
     CSCTL2 |= SELM__DCOCLK;        // Use DCO as Main Clock Source
@@ -57,6 +58,7 @@ struct cpu430_cs_t
     CSCTL3 |= DIVM_3;                       // Div = 8
 #else
 #warning F_CPU is not a know frequency value
+#endif
 #endif
   }
 

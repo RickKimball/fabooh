@@ -33,9 +33,10 @@
 
 int main(void)
 {
-#if defined(ENERGIA)
+#if defined(__MSP430_HAS_FRAM__)
     /* warning: optimal size reduction is achieved with -mdisable-watchdog compile time flag*/
     WDTCTL = WDTPW | WDTHOLD;
+    PM5CTL0 &= ~LOCKLPM5;
 #endif
 
     CPU::init_clock();

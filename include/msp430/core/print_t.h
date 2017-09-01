@@ -118,13 +118,12 @@ private:
     _puts(reinterpret_cast<const unsigned char *>(s));
   }
 
-
   //------------------------------------------------------------
   // public
   //------------------------------------------------------------
 public:
 
-  void print(const char * s) {
+  void print(const char s[]) {
     _puts(s);
   }
 
@@ -132,16 +131,12 @@ public:
     _puts(s);
   }
 
+  void print(char c) {
+    write(c);
+  }
+
   //----------------- signed --------------------------
   //
-
-  void print(int8_t i, const base_e base=DEC) {
-    if ( base == DEC && i < 0 ) {
-      write((uint8_t)'-');
-      i = -i;
-    }
-    print((uint8_t)i, base);
-  }
 
   void print(int16_t i, const base_e base=DEC) {
     if ( base == DEC && i < 0 ) {
@@ -195,7 +190,8 @@ public:
   }
 
   void println(void) {
-    write((uint8_t)0xa);
+    _puts("\r\n");
+    //write((uint8_t)0xa);
   }
 
   /*
@@ -213,6 +209,7 @@ public:
     return _print_float(f, decimal_places);
   }
 
+#if 0
   /*
    * printf() - you probably don't want to use this either if you care about code size
    *
@@ -291,6 +288,7 @@ public:
     }
     va_end(a);
   }
+#endif
 
   /*
    * write - write 1 byte character
@@ -405,10 +403,12 @@ private:
 
 // Serial << 1234; // print ascii decimal version of 1234
 
+#if 0
 template<typename PRINT_T, typename T>
 inline PRINT_T &operator << (PRINT_T &obj, const T arg) {
   obj.print(arg); return obj;
 }
+#endif
 
 //   Serial << _HEX(1234); // print ascii hex version of decimal 1234
 

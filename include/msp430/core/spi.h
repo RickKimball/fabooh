@@ -104,7 +104,9 @@ struct spi_base_t {
 
 #include <drivers/spi_usi.h>
 #include <drivers/spi_usci.h>
+#ifdef __MSP430_HAS_EUSCI_B0__
 #include <drivers/spi_eusci.h>
+#endif
 #include <drivers/spi_bitbang.h>
 
 #endif /* SPI_H_ */
