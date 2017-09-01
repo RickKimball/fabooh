@@ -4,4 +4,10 @@
 
 PROJECT=arduino_isp
 
-include ../../../common.mk
+include ../../../common_board.mk
+
+ifeq ($(BOARD),bluepill)
+ include ../../../common.mk
+else
+ include ../../../common_empty.mk
+endif
