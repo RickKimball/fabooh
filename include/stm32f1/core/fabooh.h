@@ -17,7 +17,8 @@
 #include "gpio.h"
 #include "print.h"
 #include "serial.h"
-
 #include <pins.h>       /* from variant directory */
+
+#include "spi.h"
 
 #endif /* FABOOH_H_ */
