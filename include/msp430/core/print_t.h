@@ -190,8 +190,7 @@ public:
   }
 
   void println(void) {
-    _puts("\r\n");
-    //write((uint8_t)0xa);
+    write((uint8_t)0xa);
   }
 
   /*
@@ -403,12 +402,10 @@ private:
 
 // Serial << 1234; // print ascii decimal version of 1234
 
-#if 0
 template<typename PRINT_T, typename T>
 inline PRINT_T &operator << (PRINT_T &obj, const T arg) {
   obj.print(arg); return obj;
 }
-#endif
 
 //   Serial << _HEX(1234); // print ascii hex version of decimal 1234
 

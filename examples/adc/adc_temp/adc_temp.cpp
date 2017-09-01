@@ -18,8 +18,13 @@
 typedef serial_default_t<9600,CPU::frequency,TX_PIN,NO_PIN> serial_t;
 
 // conditional compiles let you compare sizes and code generated
-#undef USE_FIX16
-#define USE_INTEGER_MATH
+#if 0
+ #undef USE_FIX16
+ #define USE_INTEGER_MATH
+#else
+ #define USE_FIX16
+ #undef USE_INTEGER_MATH
+#endif
 
 #if defined(__MSP430G2553__) || defined(__MSP430G2231__) || defined(__MSP430G2452__)
 void setup() {

@@ -6,7 +6,7 @@
 #include <main.h>
 
 // instance the builtin LED
-LED_BUILTIN_ myLED;  
+LED_BUILTIN myLED;  
 
 void blink(uint8_t times, uint16_t ms, bool level = true);
 

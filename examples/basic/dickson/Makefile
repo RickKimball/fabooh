@@ -6,7 +6,7 @@ PROJECT?=dickson
 
 include ../../../common_board.mk
 
-ifeq ($(BOARD),msp430g2553in20)
+ifneq ($(filter $(BOARD),msp430g2553in20 msp430g2452in20 msp43g2231in14),)
 include ../../../common.mk
 FABOOH_FLAGS += -DSMALL_INIT4
 else

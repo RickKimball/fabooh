@@ -10,7 +10,6 @@ LED_BUILTIN LED;
 
 void setup(void) {
   LED.setmode_output();
-  LED.off();
 }
 
 void loop(void) {
@@ -18,9 +17,9 @@ void loop(void) {
   static const uint32_t msec_delay0 = 1000 / Hz / 2;
 
   while (1) {
-    LED.on();
+    LED.high();
     delay(msec_delay0);
-    LED.off();
+    LED.low();
     delay(msec_delay0);
   }
 }
