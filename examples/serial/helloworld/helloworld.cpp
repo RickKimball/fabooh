@@ -21,7 +21,7 @@
    usci_serial_t < 9600, CPU::frequency, TX_PIN, NO_PIN > Serial;
  #endif
 
-#else /* STM32F1 */
+#elif defined(STM32F1)
 
  #if 1
    serial_usart_isr_t<9600, CPU::frequency, TX_PIN, NO_PIN> Serial;
@@ -29,6 +29,8 @@
  #else
    serial_default_t<9600, CPU::frequency, TX_PIN, NO_PIN> Serial;
  #endif
+#else
+   serial_default_t<9600, CPU::frequency, TX_PIN, NO_PIN> Serial;
 #endif
 
 inline void setup(void)
